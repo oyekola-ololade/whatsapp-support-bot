@@ -35,8 +35,18 @@ Answers common WhatsApp support questions from an FAQ index and escalates the re
 
 ## Architecture
 
-Open the [visual project page](./index.html#architecture) for the flow derived from the sanitized export.
+The diagram below represents the sanitized template flow. External services, credentials, and environment-specific identifiers must be configured before execution.
 
+```mermaid
+flowchart TD
+    A["WhatsApp support webhook"] --> B["Normalize phone and message"]
+    B --> C["Search FAQ index"]
+    C --> D{"Confident match?"}
+    D -->|Yes| E["Send FAQ answer"]
+    E --> F["Mark resolved"]
+    D -->|No| G["Create human-support queue item"]
+    G --> H["Notify support agent in Slack"]
+```
 
 ## Workflow
 
