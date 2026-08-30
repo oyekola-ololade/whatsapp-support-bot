@@ -1,0 +1,388 @@
+{
+  "name": "T9_WhatsApp_Support_Bot",
+  "nodes": [
+    {
+      "id": "ad6189e0-a01c-4ccf-89ad-1925331461b4",
+      "name": "Note_e303443b",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        50,
+        50
+      ],
+      "parameters": {
+        "content": "Created by Oyekola Ololade\nhttps://www.linkedin.com/in/ololade-oyekola-5b1797397/\nn8n Template Library - Gumroad",
+        "width": 300,
+        "height": 100,
+        "color": 4
+      }
+    },
+    {
+      "id": "3cb2c0c1-4d85-467d-9e39-63699ea04eea",
+      "name": "WhatsApp Support Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "04dbde9f-4c30-4bff-8214-b7aa09a508e8",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-support",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "00e0d173-afa3-4a0c-bf7e-766054cde6f0",
+      "name": "Extract Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        450,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "66959e2c-d3e1-41da-9b39-998c5c9b2c4a",
+              "name": "phone",
+              "value": "={{ $json.body.From }}",
+              "type": "string"
+            },
+            {
+              "id": "e643acce-16bf-4ae1-87e0-11b54b92693a",
+              "name": "message",
+              "value": "={{ $json.body.Body.toLowerCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "84dfba84-5682-4664-91ae-fe5cc82d06c0",
+      "name": "Search FAQ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "YOUR_FAQ_API_URL/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_API_KEY"
+            }
+          ]
+        },
+        "options": {
+          "qs": {
+            "q": "={{ $json.message }}"
+          }
+        }
+      }
+    },
+    {
+      "id": "9ab96224-e69c-411d-b91a-076336859366",
+      "name": "FAQ Match?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "7705c11a-a76f-4472-b562-9b1e596fc2c5",
+              "leftValue": "={{ $json.confidence }}",
+              "rightValue": 0.8,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c4490386-36c2-4a28-ab02-3ea0c11b2184",
+      "name": "Send FAQ Answer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/YOUR_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Basic YOUR_TWILIO_AUTH"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "To",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "From",
+              "value": "YOUR_TWILIO_NUMBER"
+            },
+            {
+              "name": "Body",
+              "value": "={{ $json.answer }} - Resolved"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6be102a8-f2e7-4ada-946d-630fb024a63d",
+      "name": "Mark Resolved",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1250,
+        200
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "540c367d-c1bf-4c5b-892b-1f9295da4eeb",
+              "name": "status",
+              "value": "resolved",
+              "type": "string"
+            },
+            {
+              "id": "75fa3821-9857-4690-ab50-3f17d9b6b259",
+              "name": "channel",
+              "value": "whatsapp",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "7f86d820-03dd-4a89-8ef2-6eecb95bb3c1",
+      "name": "Route to Human",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_SUPPORT_QUEUE_WEBHOOK",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": false,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {},
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "priority",
+              "value": "medium"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a447ef17-e79d-4c9d-aee2-7c8f1c372336",
+      "name": "Notify Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1250,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_SLACK_WEBHOOK_URL",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": false,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {},
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=\"New support ticket from: \" + $json.phone + \" | Message: \" + $json.message"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "6be00114-49f5-444e-99b0-d5884dc724c8",
+      "name": "End",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "WhatsApp Support Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Message": {
+      "main": [
+        [
+          {
+            "node": "Search FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search FAQ": {
+      "main": [
+        [
+          {
+            "node": "FAQ Match?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ Match?": {
+      "main": [
+        [
+          {
+            "node": "Send FAQ Answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route to Human",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send FAQ Answer": {
+      "main": [
+        [
+          {
+            "node": "Mark Resolved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Resolved": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route to Human": {
+      "main": [
+        [
+          {
+            "node": "Notify Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Agent": {
+      "main": [
+        [
+          {
+            "node": "End",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    "Gumroad",
+    "Production",
+    "Template",
+    "Oyekola Ololade"
+  ],
+  "pinData": {},
+  "staticData": null
+}

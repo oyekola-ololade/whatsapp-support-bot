@@ -8,17 +8,87 @@ Answers common WhatsApp support questions from an FAQ index and escalates the re
 
 ---
 
+**[Open the visual project page →](./index.html)**
+
 ## Table of Contents
 
-- [Problem](#problem)
-- [Solution](#solution)
+- [Overview](#overview)
 - [Architecture](#architecture)
 - [Workflow](#workflow)
 - [Tech Stack](#tech-stack)
-- [Configuration](#configuration)
-- [Error Handling & Resilience](#error-handling--resilience)
-- [Use Cases](#use-cases)
-- [Demo](#demo)
+- [Demo status](#demo-status)
 - [Setup](#setup)
 - [Repository Structure](#repository-structure)
 - [Disclaimer](#disclaimer)
+
+## Overview
+
+**Trigger:** Webhook (WhatsApp support message: From, Body)
+
+Answers common WhatsApp support questions from an FAQ index and escalates the rest to a human queue.
+
+### Key Features
+
+- Confidence-gated auto-resolution
+- Human handoff with full message context
+- Resolved/queued status tracking
+
+## Architecture
+
+Open the [visual project page](./index.html#architecture) for the flow derived from the sanitized export.
+
+
+## Workflow
+
+1. WhatsApp support webhook receives the inbound message
+2. Extract phone number and lowercase the message
+3. Search an FAQ index for a confident match
+4. High confidence: send the FAQ answer directly and mark resolved
+5. Low confidence: route to a human support queue and notify the agent in Slack
+
+## Tech Stack
+
+- n8n
+- Twilio (WhatsApp)
+- Custom FAQ search API
+- Slack
+
+## Demo status
+
+A configured live-run recording is not included yet. Credentials and service identifiers remain placeholders.
+
+
+## Setup
+
+1. Import `workflow/T9_WhatsApp_Support_Bot.json` into your n8n instance (**Workflows → Import from File**).
+2. Replace every placeholder credential/URL in the workflow (e.g. `YOUR_..._API_KEY`, `YOUR_..._URL`) with your own service credentials.
+3. Activate the workflow and point the relevant integration (webhook source, scheduled trigger, etc.) at the generated webhook URL.
+4. Test with a sample payload before going live.
+
+## Repository Structure
+
+```text
+.
+├── index.html
+├── README.md
+├── LICENSE
+├── .gitignore
+└── workflow/
+    └── T9_WhatsApp_Support_Bot.json
+```
+
+
+## Disclaimer
+
+This workflow was built as a portfolio/template project to demonstrate n8n workflow automation and AI integration. API credentials and sensitive configuration have been removed before publication — replace all `YOUR_..._KEY` / `YOUR_..._URL` placeholders with your own before use.
+
+---
+
+Designed and engineered by
+
+**Oyekola Ololade**
+
+AI Systems & Integration Engineer
+
+- LinkedIn: <http://linkedin.com/in/ololade-oyekola-5b1797397>
+- Email: <oyekolaololade69@gmail.com>
