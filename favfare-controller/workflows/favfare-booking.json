@@ -45,7 +45,14 @@
         "contentType": "json",
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json.action === 'request_booking' ? { action: 'request_booking', enquiry_id: $json.enquiry_id, preferred_date: $json.preferred_date, preferred_time: $json.preferred_time } : { action: 'availability_for_date', date: $json.preferred_date }) }}",
-        "options": {}
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
       },
       "id": "36a17918-adfd-4ec9-b75c-4cf9eafbc6d6",
       "name": "Favfare Booking Gateway",
@@ -55,7 +62,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $json ?? {};\n\nif (d.ok === true && d.booking_status === 'requested') {\n  return [{ json: d }];\n}\n\nif (d.ok === true && d.is_open === true) {\n  const slots = Array.isArray(d.slots) ? d.slots.slice(0, 8).map((s) => String(s).slice(0, 5)) : [];\n  return [{ json: { ...d, reply: slots.length ? `Demo availability for ${d.date}: ${slots.join(', ')}. Appointment requests still require Favfare staff confirmation.` : `There are no remaining demo slots for ${d.date}.` } }];\n}\n\nif (d.ok === true && d.is_open === false) {\n  return [{ json: { ...d, reply: `Favfare is closed for the demo schedule on ${d.date}. Please choose another date.` } }];\n}\n\nreturn [{ json: { ...d, reply: d.reply ?? 'I could not complete that booking request. A Favfare team member can assist.' } }];"
+        "jsCode": "const d = $json ?? {};\n\nif (d.ok === true && d.booking_status === 'requested') {\n  return [{ json: d }];\n}\n\nif (d.ok === true && d.is_open === true) {\n  const slots = Array.isArray(d.slots) ? d.slots.slice(0, 8).map((s) => String(s).slice(0, 5)) : [];\n  return [{ json: { ...d, reply: slots.length ? `Demo availability for ${d.date}: ${slots.join(', ')}. Appointment requests still require Favfare staff confirmation.` : `There are no remaining demo slots for ${d.date}.` } }];\n}\n\nif (d.ok === true && d.is_open === false) {\n  return [{ json: { ...d, reply: `Favfare is closed for the demo schedule on ${d.date}. Please choose another date.` } }];\n}\n\nif (d.error === 'slot_unavailable' || d.error === 'slot_just_became_unavailable') {\n  const alternatives = Array.isArray(d.alternatives) ? d.alternatives.slice(0, 6).map((s) => String(s).slice(0, 5)) : [];\n  return [{ json: { ...d, reply: alternatives.length ? `That demo slot is no longer available. Other times on the same date are: ${alternatives.join(', ')}.` : 'That demo slot is no longer available. Please choose another date or time.' } }];\n}\n\nreturn [{ json: { ...d, reply: d.reply ?? 'I could not complete that booking request. A Favfare team member can assist.' } }];"
       },
       "id": "e73be372-c3dd-47bc-97fe-b73b650a72a4",
       "name": "Build Booking Reply",
