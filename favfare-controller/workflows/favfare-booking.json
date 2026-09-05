@@ -1,0 +1,96 @@
+{
+  "name": "Favfare Demo — Availability + Booking Request",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "favfare-demo/booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c1825165-05f2-4a97-a7c3-c56a01f2060c",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-520, 0],
+      "webhookId": "47cc7391-ced2-45ca-a138-370282df657c"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nlet action = String(body.action ?? '').trim();\nconst preferredDate = String(body.preferred_date ?? body.date ?? '').trim();\nconst preferredTime = String(body.preferred_time ?? '').trim();\nconst enquiryId = String(body.enquiry_id ?? '').trim();\n\nif (!action) action = preferredTime ? 'request_booking' : 'availability_for_date';\n\nreturn [{ json: { action, preferred_date: preferredDate, preferred_time: preferredTime, enquiry_id: enquiryId } }];"
+      },
+      "id": "ee202b8f-6848-4d8c-ad67-9548b885d32d",
+      "name": "Normalize Booking Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-280, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FAVFARE_DATA_GATEWAY_URL }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-favfare-demo-key",
+              "value": "={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.action === 'request_booking' ? { action: 'request_booking', enquiry_id: $json.enquiry_id, preferred_date: $json.preferred_date, preferred_time: $json.preferred_time } : { action: 'availability_for_date', date: $json.preferred_date }) }}",
+        "options": {}
+      },
+      "id": "36a17918-adfd-4ec9-b75c-4cf9eafbc6d6",
+      "name": "Favfare Booking Gateway",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-20, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $json ?? {};\n\nif (d.ok === true && d.booking_status === 'requested') {\n  return [{ json: d }];\n}\n\nif (d.ok === true && d.is_open === true) {\n  const slots = Array.isArray(d.slots) ? d.slots.slice(0, 8).map((s) => String(s).slice(0, 5)) : [];\n  return [{ json: { ...d, reply: slots.length ? `Demo availability for ${d.date}: ${slots.join(', ')}. Appointment requests still require Favfare staff confirmation.` : `There are no remaining demo slots for ${d.date}.` } }];\n}\n\nif (d.ok === true && d.is_open === false) {\n  return [{ json: { ...d, reply: `Favfare is closed for the demo schedule on ${d.date}. Please choose another date.` } }];\n}\n\nreturn [{ json: { ...d, reply: d.reply ?? 'I could not complete that booking request. A Favfare team member can assist.' } }];"
+      },
+      "id": "e73be372-c3dd-47bc-97fe-b73b650a72a4",
+      "name": "Build Booking Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "8033d2cb-550b-4e18-9369-ec0c95ec9ed6",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [500, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Normalize Booking Request", "type": "main", "index": 0}]]
+    },
+    "Normalize Booking Request": {
+      "main": [[{"node": "Favfare Booking Gateway", "type": "main", "index": 0}]]
+    },
+    "Favfare Booking Gateway": {
+      "main": [[{"node": "Build Booking Reply", "type": "main", "index": 0}]]
+    },
+    "Build Booking Reply": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
