@@ -1,0 +1,90 @@
+{
+  "name": "Favfare Demo — CRM Backend",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "favfare-demo/crm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "6a87427f-3c87-4f07-aad4-1097e5fb4313",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-420, 0],
+      "webhookId": "5397ea7b-ce23-4b5e-9bce-9de056375f17"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json; return [{ json: body }];"
+      },
+      "id": "d29ce332-3990-4231-910e-5fd2a74c0d40",
+      "name": "Normalize CRM Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-180, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FAVFARE_CRM_GATEWAY_URL }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-favfare-demo-key",
+              "value": "={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "56dc3e9f-70e0-49ce-a89f-e33cd63ef6da",
+      "name": "Favfare CRM Gateway",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [60, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "5204793e-40b2-4615-9fcf-5fa0edbfcc35",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [300, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Normalize CRM Request", "type": "main", "index": 0}]]
+    },
+    "Normalize CRM Request": {
+      "main": [[{"node": "Favfare CRM Gateway", "type": "main", "index": 0}]]
+    },
+    "Favfare CRM Gateway": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
