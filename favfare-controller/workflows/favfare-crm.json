@@ -29,7 +29,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.FAVFARE_CRM_GATEWAY_URL }}",
+        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/favfare-demo-crm",
         "authentication": "none",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
