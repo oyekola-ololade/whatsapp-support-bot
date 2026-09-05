@@ -1,0 +1,12 @@
+{
+  "name": "favfare-n8n-controller",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node sync.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
