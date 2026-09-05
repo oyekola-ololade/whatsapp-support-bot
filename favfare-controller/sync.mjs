@@ -35,6 +35,21 @@ function writableWorkflow(spec) {
   };
 }
 
+async function hydrateWorkflow(spec, here) {
+  const htmlFile = spec?.controller?.embed_html_file;
+  if (!htmlFile) return spec;
+  const html = await fs.readFile(path.join(here, htmlFile), 'utf8');
+  let injected = false;
+  for (const node of spec.nodes ?? []) {
+    if (node?.parameters?.responseBody === '__FAVFARE_EMBED_HTML__') {
+      node.parameters.responseBody = html;
+      injected = true;
+    }
+  }
+  if (!injected) throw new Error(`No HTML placeholder found in ${spec.name}`);
+  return spec;
+}
+
 async function syncWorkflow(spec) {
   const list = await api('/workflows?limit=100');
   const current = (list?.data ?? []).find((w) => w.name === spec.name);
@@ -74,7 +89,7 @@ const files = (await fs.readdir(workflowDir)).filter((f) => f.endsWith('.json'))
 
 for (const file of files) {
   const raw = await fs.readFile(path.join(workflowDir, file), 'utf8');
-  const spec = JSON.parse(raw);
+  const spec = await hydrateWorkflow(JSON.parse(raw), here);
   await syncWorkflow(spec);
 }
 
