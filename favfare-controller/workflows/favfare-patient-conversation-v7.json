@@ -1,0 +1,41 @@
+{
+  "name": "Favfare Demo — Patient Conversation V7",
+  "active": true,
+  "controller": {
+    "embed_code_files": {
+      "Normalize V7": "code/patient-v7-normalize.js",
+      "Render V7": "code/patient-v7-render.js"
+    }
+  },
+  "nodes": [
+    {
+      "parameters": {"httpMethod":"POST","path":"favfare-demo/patient-action-v7","responseMode":"responseNode","options":{}},
+      "id":"a7d4f313-3d14-4c21-b460-97193c3a1f10","name":"Patient Conversation V7","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-520,0],"webhookId":"42c2d28c-7844-4fdd-b68e-1fd61b621d2e"
+    },
+    {
+      "parameters":{"jsCode":"__FAVFARE_NORMALIZE_V7__"},"id":"f610012f-1b21-4e8b-9865-1099b37492f5","name":"Normalize V7","type":"n8n-nodes-base.code","typeVersion":2,"position":[-300,0]
+    },
+    {
+      "parameters": {
+        "method":"POST","url":"={{ $json.api_url }}","authentication":"none","sendHeaders":true,"specifyHeaders":"keypair",
+        "headerParameters":{"parameters":[{"name":"x-favfare-demo-key","value":"={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"},{"name":"x-groq-key","value":"={{ $json.action === 'chat' ? ($env.GROQ_API_KEY || '') : '' }}"}]},
+        "sendBody":true,"contentType":"json","specifyBody":"json","jsonBody":"={{ JSON.stringify($json.payload) }}","options":{"response":{"response":{"neverError":true,"responseFormat":"json"}}}
+      },
+      "id":"6be3330e-ec76-44b2-b3de-237bb84fc476","name":"Run V7 Tool","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[-60,0]
+    },
+    {
+      "parameters":{"jsCode":"__FAVFARE_RENDER_V7__"},"id":"f265cf0a-7b06-4bcb-90e2-0523b45a441d","name":"Render V7","type":"n8n-nodes-base.code","typeVersion":2,"position":[180,0]
+    },
+    {
+      "parameters":{"respondWith":"text","responseBody":"={{ $json.html }}","options":{"responseHeaders":{"entries":[{"name":"Content-Type","value":"text/html; charset=utf-8"},{"name":"Cache-Control","value":"no-store"}]}}},
+      "id":"1c4157e2-4071-4767-b77d-cbc6cc53ec49","name":"Return V7","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[420,0]
+    }
+  ],
+  "connections": {
+    "Patient Conversation V7":{"main":[[{"node":"Normalize V7","type":"main","index":0}]]},
+    "Normalize V7":{"main":[[{"node":"Run V7 Tool","type":"main","index":0}]]},
+    "Run V7 Tool":{"main":[[{"node":"Render V7","type":"main","index":0}]]},
+    "Render V7":{"main":[[{"node":"Return V7","type":"main","index":0}]]}
+  },
+  "settings":{"executionOrder":"v1"}
+}
