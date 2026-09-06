@@ -29,6 +29,7 @@ const qi=v=>'"'+String(v).replaceAll('"','""')+'"';
 const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const j=(res,status,body)=>{res.writeHead(status,{'content-type':'application/json','cache-control':'no-store','x-robots-tag':'noindex, nofollow'});res.end(JSON.stringify(body))};
 const html=(res,status,body)=>{res.writeHead(status,{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-robots-tag':'noindex, nofollow','referrer-policy':'no-referrer'});res.end(body)};
+const redirect=(res,location,status=303)=>{res.writeHead(status,{location,'cache-control':'no-store','x-robots-tag':'noindex, nofollow','referrer-policy':'no-referrer'});res.end()};
 
 async function api(url,opts={}){
   const r=await fetch(url,opts);
@@ -417,10 +418,8 @@ function pairingHtml(token,phone,code){
     try{
       const r=await fetch('/link-whatsapp/status?token='+encodeURIComponent(token),{cache:'no-store'});
       const d=await r.json();
-      const box=document.getElementById('status');
       if(d.connected){
-        box.classList.add('ok');
-        box.innerHTML='<span class="dot"></span><span>Connected. Bizi has detected the WhatsApp session.</span>';
+        window.location.replace('/link-whatsapp/success');
         return;
       }
     }catch{}
@@ -431,11 +430,19 @@ function pairingHtml(token,phone,code){
 }
 
 function connectedHtml(){
-  return shell('WhatsApp connected',`
-    <h1>WhatsApp connected</h1>
-    <p>The WhatsApp session is linked to <strong>${escapeHtml(instanceName||INSTANCE_NAME)}</strong>. Bizi has detected the connection.</p>
+  return shell('WhatsApp connected successfully',`
+    <h1>WhatsApp connected successfully</h1>
+    <p>The WhatsApp session is linked to <strong>${escapeHtml(instanceName||INSTANCE_NAME)}</strong>. Bizi has detected the connection and the channel is ready for the controlled integration test.</p>
     <div class="status ok"><span class="dot"></span><span>Connection active</span></div>
     <p><small>Outbound automation is still locked in dry-run until the integration test is approved.</small></p>
+  `);
+}
+
+function connectionPendingHtml(){
+  return shell('WhatsApp connection pending',`
+    <h1>Connection not active yet</h1>
+    <p>WhatsApp has not completed the device-link handshake. Return to the secure linking page and generate a fresh code if needed.</p>
+    <div class="status"><span class="dot"></span><span>Waiting for connection</span></div>
   `);
 }
 
@@ -481,13 +488,20 @@ const server=http.createServer(async(req,res)=>{
       });
     }
 
+    if(req.method==='GET'&&u.pathname==='/link-whatsapp/success'){
+      const state=await connectionState();
+      const connection=clean(state?.data?.instance?.state??state?.data?.state).toLowerCase();
+      if(connection==='open')return html(res,200,connectedHtml());
+      return html(res,409,connectionPendingHtml());
+    }
+
     if(u.pathname.startsWith('/link-whatsapp')){
       if(!authorized(u))return j(res,404,{ok:false,error:'not_found'});
 
       if(req.method==='GET'&&u.pathname==='/link-whatsapp'){
         const state=await connectionState();
         const connection=clean(state?.data?.instance?.state??state?.data?.state).toLowerCase();
-        if(connection==='open')return html(res,200,connectedHtml());
+        if(connection==='open')return redirect(res,'/link-whatsapp/success');
         return html(res,200,linkStartHtml(LINK_ACCESS_TOKEN));
       }
 
@@ -504,7 +518,7 @@ const server=http.createServer(async(req,res)=>{
         if(!normalized)return html(res,400,linkStartHtml(LINK_ACCESS_TOKEN,'Enter a valid WhatsApp number in international format.'));
         const stateBefore=await connectionState();
         const before=clean(stateBefore?.data?.instance?.state??stateBefore?.data?.state).toLowerCase();
-        if(before==='open')return html(res,200,connectedHtml());
+        if(before==='open')return redirect(res,'/link-whatsapp/success');
         const pair=await connectPairing(normalized);
         console.log('PAIRING_CODE_ATTEMPT',pair.status,Boolean(pair.pairingCode));
         if(!pair.ok){
@@ -512,7 +526,7 @@ const server=http.createServer(async(req,res)=>{
         }
         if(!pair.pairingCode){
           const after=clean(pair.data?.instance?.state??pair.data?.instance?.status??pair.data?.state??pair.data?.status).toLowerCase();
-          if(after==='open')return html(res,200,connectedHtml());
+          if(after==='open')return redirect(res,'/link-whatsapp/success');
           return html(res,502,linkStartHtml(LINK_ACCESS_TOKEN,'Evolution did not return a pairing code. Try again once, or use the QR fallback.'));
         }
         return html(res,200,pairingHtml(LINK_ACCESS_TOKEN,normalized,pair.pairingCode));
