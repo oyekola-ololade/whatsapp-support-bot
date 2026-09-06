@@ -1,7 +1,7 @@
 {
   "name": "Favfare Demo — CRM UI",
   "active": true,
-  "controller": {"embed_html_file":"ui/index.html"},
+  "controller": {"embed_html_file":"ui/index-v2.html"},
   "nodes": [
     {
       "parameters": {
