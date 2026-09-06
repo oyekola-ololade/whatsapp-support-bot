@@ -4,35 +4,24 @@ import { fileURLToPath } from 'node:url';
 
 const N8N_URL = String(process.env.N8N_URL ?? '').replace(/\/$/, '');
 const N8N_API_KEY = String(process.env.N8N_API_KEY ?? '');
-
 if (!N8N_URL) throw new Error('N8N_URL is required');
 if (!N8N_API_KEY) throw new Error('N8N_API_KEY is required');
 
 async function api(endpoint, { method = 'GET', body } = {}) {
   const res = await fetch(`${N8N_URL}/api/v1${endpoint}`, {
     method,
-    headers: {
-      'X-N8N-API-KEY': N8N_API_KEY,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'X-N8N-API-KEY': N8N_API_KEY, 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const text = await res.text();
   let data = null;
   try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-  if (!res.ok) {
-    throw new Error(`${method} ${endpoint} failed (${res.status}): ${typeof data === 'string' ? data.slice(0, 400) : JSON.stringify(data).slice(0, 400)}`);
-  }
+  if (!res.ok) throw new Error(`${method} ${endpoint} failed (${res.status}): ${typeof data === 'string' ? data.slice(0,400) : JSON.stringify(data).slice(0,400)}`);
   return data;
 }
 
 function writableWorkflow(spec) {
-  return {
-    name: spec.name,
-    nodes: spec.nodes,
-    connections: spec.connections ?? {},
-    settings: spec.settings ?? {},
-  };
+  return { name: spec.name, nodes: spec.nodes, connections: spec.connections ?? {}, settings: spec.settings ?? {} };
 }
 
 async function hydrateWorkflow(spec, here) {
@@ -56,16 +45,15 @@ async function syncWorkflow(spec) {
   let saved;
 
   if (current) {
-    saved = await api(`/workflows/${current.id}`, {
-      method: 'PUT',
-      body: writableWorkflow(spec),
-    });
+    const before = await api(`/workflows/${current.id}`);
+    if (before.active) {
+      await api(`/workflows/${current.id}/deactivate`, { method: 'POST' });
+      console.log(`DEACTIVATED_FOR_UPDATE ${spec.name} ${current.id}`);
+    }
+    saved = await api(`/workflows/${current.id}`, { method: 'PUT', body: writableWorkflow(spec) });
     console.log(`UPDATED ${spec.name} ${current.id}`);
   } else {
-    saved = await api('/workflows', {
-      method: 'POST',
-      body: writableWorkflow(spec),
-    });
+    saved = await api('/workflows', { method: 'POST', body: writableWorkflow(spec) });
     console.log(`CREATED ${spec.name} ${saved.id}`);
   }
 
@@ -86,11 +74,9 @@ async function syncWorkflow(spec) {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const workflowDir = path.join(here, 'workflows');
 const files = (await fs.readdir(workflowDir)).filter((f) => f.endsWith('.json')).sort();
-
 for (const file of files) {
   const raw = await fs.readFile(path.join(workflowDir, file), 'utf8');
   const spec = await hydrateWorkflow(JSON.parse(raw), here);
   await syncWorkflow(spec);
 }
-
 console.log(`SYNC_COMPLETE count=${files.length}`);
