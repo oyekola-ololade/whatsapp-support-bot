@@ -2,12 +2,12 @@ import './server.mjs';
 
 const EVO=String(process.env.EVOLUTION_API_URL||'').replace(/\/$/,'');
 const EVO_KEY=String(process.env.EVOLUTION_API_KEY||'');
-const INSTANCE_NAME=String(process.env.INSTANCE_NAME||'favfare-primary').trim();
+const INSTANCE_NAME=String(process.env.INSTANCE_NAME||'').trim();
 const TARGET_INSTANCE_ID=String(process.env.EVOLUTION_INSTANCE_ID||'').trim();
 const WEBHOOK_URL=String(process.env.WEBHOOK_URL||'').trim();
 const HOOK_SECRET=String(process.env.WEBHOOK_SHARED_SECRET||'');
 const REQUIRED_EVENTS=['MESSAGES_UPSERT'];
-const CORE=String(process.env.BIZI_CORE_URL||'https://shftukueyostzbyqxmqw.supabase.co/functions/v1').replace(/\/$/,'');
+const CORE=String(process.env.BIZI_CORE_URL||'').replace(/\/$/,'');
 const CORE_KEY=String(process.env.BIZI_CORE_KEY||'');
 const GLOBAL_DRY_RUN=String(process.env.GLOBAL_DRY_RUN||'true')!=='false';
 const FOLLOWUP_ENABLED=String(process.env.FOLLOWUP_ENABLED||'false')==='true';
@@ -17,128 +17,17 @@ const FOLLOWUP_INTERVAL_MS=Math.max(60000,Number(process.env.FOLLOWUP_INTERVAL_M
 const FOLLOWUP_LIMIT=Math.min(25,Math.max(1,Number(process.env.FOLLOWUP_LIMIT||10)));
 const RUN_FOLLOWUP_SMOKE_TEST=String(process.env.RUN_FOLLOWUP_SMOKE_TEST||'false')==='true';
 const OUTBOUND_ALLOWLIST=String(process.env.OUTBOUND_TEST_ALLOWLIST||'').split(',').map(x=>x.replace(/\D/g,'')).filter(Boolean);
+if(!CORE||!CORE_KEY||!INSTANCE_NAME)throw new Error('Bizi gateway runtime configuration missing');
 
-const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const clean=v=>String(v??'').trim();
-const parse=async(r)=>{const t=await r.text();try{return t?JSON.parse(t):null}catch{return t}};
-
-async function core(path,body){
-  const r=await fetch(`${CORE}/${path}`,{method:'POST',headers:{'content-type':'application/json','x-bizi-core-key':CORE_KEY},body:JSON.stringify(body)});
-  const data=await parse(r);
-  return {ok:r.ok,status:r.status,data};
-}
-
-async function ensureWebhook(){
-  if(!EVO||!EVO_KEY||!INSTANCE_NAME||!WEBHOOK_URL){
-    console.log('WEBHOOK_WATCHDOG_SKIPPED missing_config');
-    return;
-  }
-  try{
-    const headers={apikey:EVO_KEY,'content-type':'application/json'};
-    const found=await fetch(`${EVO}/webhook/find/${encodeURIComponent(INSTANCE_NAME)}`,{headers:{apikey:EVO_KEY}});
-    const current=await parse(found);
-    const currentEvents=Array.isArray(current?.events)?current.events:[];
-    const currentHeaders=current?.headers&&typeof current.headers==='object'?current.headers:{};
-    const healthy=found.ok&&current?.url===WEBHOOK_URL&&REQUIRED_EVENTS.every(e=>currentEvents.includes(e))&&(!HOOK_SECRET||currentHeaders['x-bizi-webhook-secret']===HOOK_SECRET);
-    if(healthy){
-      console.log('WEBHOOK_WATCHDOG_OK',INSTANCE_NAME);
-      return;
-    }
-    const body={enabled:true,url:WEBHOOK_URL,events:REQUIRED_EVENTS,headers:HOOK_SECRET?{'x-bizi-webhook-secret':HOOK_SECRET}:{},byEvents:false,base64:false};
-    const set=await fetch(`${EVO}/webhook/set/${encodeURIComponent(INSTANCE_NAME)}`,{method:'POST',headers,body:JSON.stringify(body)});
-    const result=await parse(set);
-    if(set.ok) console.log('WEBHOOK_WATCHDOG_APPLIED',INSTANCE_NAME,set.status);
-    else console.log('WEBHOOK_WATCHDOG_FAILED',INSTANCE_NAME,set.status,typeof result==='string'?result.slice(0,300):JSON.stringify(result).slice(0,300));
-  }catch(e){
-    console.log('WEBHOOK_WATCHDOG_ERROR',e?.message||'unknown');
-  }
-}
-
-let routeCache=null;
-let sendAuthCache='';
-let followupRunning=false;
-
-async function resolveRoute(){
-  if(routeCache)return routeCache;
-  if(!TARGET_INSTANCE_ID)return null;
-  const r=await core('bizi-core-router',{action:'resolve_channel',provider:'evolution_api',external_instance_id:TARGET_INSTANCE_ID});
-  if(!r.ok||!r.data?.ok)return null;
-  routeCache=r.data;
-  return routeCache;
-}
-
-async function resolveSendAuth(){
-  if(sendAuthCache)return sendAuthCache;
-  if(!EVO||!EVO_KEY)return '';
-  try{
-    const r=await fetch(`${EVO}/instance/fetchInstances`,{headers:{apikey:EVO_KEY}});
-    const d=await parse(r);
-    if(r.ok){
-      const list=Array.isArray(d)?d:(Array.isArray(d?.instances)?d.instances:[]);
-      const row=list.find(x=>clean(x?.id??x?.instanceId??x?.instance?.instanceId)===TARGET_INSTANCE_ID)||list.find(x=>clean(x?.name??x?.instanceName??x?.instance?.instanceName)===INSTANCE_NAME)||list[0];
-      sendAuthCache=clean(row?.token??row?.hash?.apikey??row?.hash??row?.instance?.token);
-    }
-  }catch{}
-  return sendAuthCache||EVO_KEY;
-}
-
-async function sendFollowup(dispatch){
-  const number=clean(dispatch?.remote_jid).split('@')[0].replace(/\D/g,'');
-  if(!number)return {ok:false,status:400,error:'invalid_remote'};
-  const allowlisted=OUTBOUND_ALLOWLIST.includes(number);
-  const liveAllowed=(!GLOBAL_DRY_RUN)||(FOLLOWUP_LIVE_TEST&&allowlisted);
-  if(!liveAllowed)return {ok:false,status:0,error:'followup_send_locked'};
-  if(GLOBAL_DRY_RUN&&!allowlisted)return {ok:false,status:0,error:'followup_remote_not_allowlisted'};
-  const auth=await resolveSendAuth();if(!auth)return {ok:false,status:0,error:'evolution_auth_missing'};
-  const r=await fetch(`${EVO}/message/sendText/${encodeURIComponent(INSTANCE_NAME)}`,{method:'POST',headers:{apikey:auth,'content-type':'application/json'},body:JSON.stringify({number,text:dispatch.message})});
-  const d=await parse(r);
-  return {ok:r.ok,status:r.status,data:d,error:r.ok?null:'evolution_send_failed'};
-}
-
-async function followupTick(){
-  if(!FOLLOWUP_ENABLED||followupRunning)return;
-  followupRunning=true;
-  try{
-    const route=await resolveRoute();
-    if(!route?.client_key||!route?.channel?.id){console.log('FOLLOWUP_TICK_SKIPPED route_unavailable');return}
-    const scan=await core('bizi-core-followup',{action:'scan_due',client_key:route.client_key,channel_id:route.channel.id,limit:FOLLOWUP_LIMIT,is_demo:FOLLOWUP_DEMO});
-    if(!scan.ok||!scan.data?.ok){console.log('FOLLOWUP_SCAN_FAILED',scan.status,scan.data?.error||'unknown');return}
-    const dispatches=Array.isArray(scan.data.dispatches)?scan.data.dispatches:[];
-    if(!dispatches.length)return;
-    console.log('FOLLOWUP_DUE',dispatches.length);
-    for(const d of dispatches){
-      const sent=await sendFollowup(d);
-      if(sent.ok){
-        const externalId=clean(sent.data?.key?.id??sent.data?.data?.key?.id??sent.data?.message?.key?.id);
-        await core('bizi-core-followup',{action:'mark_sent',client_key:route.client_key,enquiry_id:d.enquiry_id,channel_id:route.channel.id,due_at:d.due_at,message:d.message,external_message_id:externalId});
-        console.log('FOLLOWUP_SENT',d.enquiry_id,Boolean(externalId));
-      }else if(sent.error!=='followup_send_locked'&&sent.error!=='followup_remote_not_allowlisted'){
-        await core('bizi-core-followup',{action:'mark_failed',client_key:route.client_key,enquiry_id:d.enquiry_id,error:sent.error||`send_${sent.status}`});
-        console.log('FOLLOWUP_FAILED',d.enquiry_id,sent.status||0,sent.error||'unknown');
-      }else{
-        console.log('FOLLOWUP_LOCKED',d.enquiry_id,sent.error);
-      }
-    }
-  }catch(e){
-    console.log('FOLLOWUP_TICK_ERROR',e?.message||'unknown');
-  }finally{followupRunning=false}
-}
-
-async function followupSmokeTest(){
-  if(!RUN_FOLLOWUP_SMOKE_TEST)return;
-  try{
-    const route=await resolveRoute();
-    const health=await core('bizi-core-followup',{action:'health'});
-    const scan=route?.client_key?await core('bizi-core-followup',{action:'scan_due',client_key:route.client_key,channel_id:route.channel?.id,limit:5,is_demo:true}):null;
-    console.log('FOLLOWUP_SMOKE_TEST',JSON.stringify({health_status:health.status,health_ok:health.data?.ok===true,route_ok:Boolean(route?.client_key),scan_status:scan?.status??null,scan_ok:scan?.data?.ok===true,due_count:Number(scan?.data?.count??0),send_enabled:FOLLOWUP_ENABLED,live_test:FOLLOWUP_LIVE_TEST}));
-  }catch(e){console.log('FOLLOWUP_SMOKE_TEST_FAILED',e?.message||'unknown')}
-}
-
-await sleep(12000);
-await ensureWebhook();
-await followupSmokeTest();
-if(FOLLOWUP_ENABLED){
-  await followupTick();
-  setInterval(followupTick,FOLLOWUP_INTERVAL_MS);
-}
-setInterval(ensureWebhook,60000);
+const parse=async r=>{const t=await r.text();try{return t?JSON.parse(t):null}catch{return t}};
+async function core(path,body){const r=await fetch(`${CORE}/${path}`,{method:'POST',headers:{'content-type':'application/json','x-bizi-core-key':CORE_KEY},body:JSON.stringify(body)});return {ok:r.ok,status:r.status,data:await parse(r)}}
+async function ensureWebhook(){if(!EVO||!EVO_KEY||!WEBHOOK_URL){console.log('WEBHOOK_WATCHDOG_SKIPPED missing_config');return}try{const found=await fetch(`${EVO}/webhook/find/${encodeURIComponent(INSTANCE_NAME)}`,{headers:{apikey:EVO_KEY}}),current=await parse(found),events=Array.isArray(current?.events)?current.events:[],headers=current?.headers&&typeof current.headers==='object'?current.headers:{},healthy=found.ok&&current?.url===WEBHOOK_URL&&REQUIRED_EVENTS.every(e=>events.includes(e))&&(!HOOK_SECRET||headers['x-bizi-webhook-secret']===HOOK_SECRET);if(healthy){console.log('WEBHOOK_WATCHDOG_OK',INSTANCE_NAME);return}const set=await fetch(`${EVO}/webhook/set/${encodeURIComponent(INSTANCE_NAME)}`,{method:'POST',headers:{apikey:EVO_KEY,'content-type':'application/json'},body:JSON.stringify({enabled:true,url:WEBHOOK_URL,events:REQUIRED_EVENTS,headers:HOOK_SECRET?{'x-bizi-webhook-secret':HOOK_SECRET:{},byEvents:false,base64:false})});const result=await parse(set);console.log(set.ok?'WEBHOOK_WATCHDOG_APPLIED':'WEBHOOK_WATCHDOG_FAILED',INSTANCE_NAME,set.status,set.ok?'':String(typeof result==='string'?result:JSON.stringify(result)).slice(0,300))}catch(e){console.log('WEBHOOK_WATCHDOG_ERROR',e?.message||'unknown')}}
+let routeCache=null,sendAuthCache='',followupRunning=false;
+async function resolveRoute(){if(routeCache)return routeCache;if(!TARGET_INSTANCE_ID)return null;const r=await core('bizi-core-router',{action:'resolve_channel',provider:'evolution_api',external_instance_id:TARGET_INSTANCE_ID});if(!r.ok||!r.data?.ok)return null;routeCache=r.data;return routeCache}
+async function resolveSendAuth(){if(sendAuthCache)return sendAuthCache;if(!EVO||!EVO_KEY)return '';try{const r=await fetch(`${EVO}/instance/fetchInstances`,{headers:{apikey:EVO_KEY}}),d=await parse(r);if(r.ok){const list=Array.isArray(d)?d:(Array.isArray(d?.instances)?d.instances:[]),row=list.find(x=>clean(x?.id??x?.instanceId??x?.instance?.instanceId)===TARGET_INSTANCE_ID)||list.find(x=>clean(x?.name??x?.instanceName??x?.instance?.instanceName)===INSTANCE_NAME)||list[0];sendAuthCache=clean(row?.token??row?.hash?.apikey??row?.hash??row?.instance?.token)}}catch{}return sendAuthCache||EVO_KEY}
+async function sendFollowup(dispatch){const number=clean(dispatch?.remote_jid).split('@')[0].replace(/\D/g,'');if(!number)return {ok:false,status:400,error:'invalid_remote'};const allowlisted=OUTBOUND_ALLOWLIST.includes(number),liveAllowed=(!GLOBAL_DRY_RUN)||(FOLLOWUP_LIVE_TEST&&allowlisted);if(!liveAllowed)return {ok:false,status:0,error:'followup_send_locked'};if(GLOBAL_DRY_RUN&&!allowlisted)return {ok:false,status:0,error:'followup_remote_not_allowlisted'};const auth=await resolveSendAuth();if(!auth)return {ok:false,status:0,error:'evolution_auth_missing'};const r=await fetch(`${EVO}/message/sendText/${encodeURIComponent(INSTANCE_NAME)}`,{method:'POST',headers:{apikey:auth,'content-type':'application/json'},body:JSON.stringify({number,text:dispatch.message})});return {ok:r.ok,status:r.status,data:await parse(r),error:r.ok?null:'evolution_send_failed'}}
+async function followupTick(){if(!FOLLOWUP_ENABLED||followupRunning)return;followupRunning=true;try{const route=await resolveRoute();if(!route?.client_key||!route?.channel?.id){console.log('FOLLOWUP_TICK_SKIPPED route_unavailable');return}const scan=await core('bizi-core-followup',{action:'scan_due',client_key:route.client_key,channel_id:route.channel.id,limit:FOLLOWUP_LIMIT,is_demo:FOLLOWUP_DEMO});if(!scan.ok||!scan.data?.ok){console.log('FOLLOWUP_SCAN_FAILED',scan.status,scan.data?.error||'unknown');return}for(const d of Array.isArray(scan.data.dispatches)?scan.data.dispatches:[]){const gate=await core('bizi-core-whatsapp',{action:'pre_send_check',client_key:route.client_key,channel_id:route.channel.id,enquiry_id:d.enquiry_id,remote_jid:d.remote_jid});if(!gate.ok||gate.data?.allowed!==true){console.log('FOLLOWUP_PRE_SEND_BLOCKED',d.enquiry_id,gate.data?.attention_status||gate.data?.error||gate.status);continue}const sent=await sendFollowup(d);if(sent.ok){const externalId=clean(sent.data?.key?.id??sent.data?.data?.key?.id??sent.data?.message?.key?.id);await core('bizi-core-followup',{action:'mark_sent',client_key:route.client_key,enquiry_id:d.enquiry_id,channel_id:route.channel.id,due_at:d.due_at,message:d.message,external_message_id:externalId});console.log('FOLLOWUP_SENT',d.enquiry_id,Boolean(externalId))}else if(!['followup_send_locked','followup_remote_not_allowlisted'].includes(sent.error)){await core('bizi-core-followup',{action:'mark_failed',client_key:route.client_key,enquiry_id:d.enquiry_id,error:sent.error||`send_${sent.status}`});console.log('FOLLOWUP_FAILED',d.enquiry_id,sent.status||0,sent.error||'unknown')}else console.log('FOLLOWUP_LOCKED',d.enquiry_id,sent.error)}}catch(e){console.log('FOLLOWUP_TICK_ERROR',e?.message||'unknown')}finally{followupRunning=false}}
+async function followupSmokeTest(){if(!RUN_FOLLOWUP_SMOKE_TEST)return;try{const route=await resolveRoute(),health=await core('bizi-core-followup',{action:'health'}),scan=route?.client_key?await core('bizi-core-followup',{action:'scan_due',client_key:route.client_key,channel_id:route.channel?.id,limit:5,is_demo:true}):null;console.log('FOLLOWUP_SMOKE_TEST',JSON.stringify({health_status:health.status,health_ok:health.data?.ok===true,route_ok:Boolean(route?.client_key),scan_status:scan?.status??null,scan_ok:scan?.data?.ok===true,due_count:Number(scan?.data?.count??0),send_enabled:FOLLOWUP_ENABLED,live_test:FOLLOWUP_LIVE_TEST}))}catch(e){console.log('FOLLOWUP_SMOKE_TEST_FAILED',e?.message||'unknown')}}
+await sleep(12000);await ensureWebhook();await followupSmokeTest();if(FOLLOWUP_ENABLED){await followupTick();setInterval(followupTick,FOLLOWUP_INTERVAL_MS)}setInterval(ensureWebhook,60000);
