@@ -1,0 +1,34 @@
+{
+  "client_key": "example_clinic",
+  "display_name": "Example Clinic",
+  "vertical": "dental_clinic",
+  "timezone": "Africa/Lagos",
+  "locale": "en-NG",
+  "currency": "NGN",
+  "branding": {
+    "brand_name": "Example Clinic",
+    "accent": "#26705b",
+    "surface": "#fffdfa"
+  },
+  "assistant_config": {
+    "channel_style": "whatsapp",
+    "tone": "concise_natural_receptionist",
+    "clinical_advice_allowed": false
+  },
+  "handoff_config": {
+    "clinical_uncertainty": "human",
+    "staff_takeover_enabled": true,
+    "assistant_resume_enabled": true
+  },
+  "channels": [
+    {
+      "channel_type": "whatsapp",
+      "provider": "evolution_api",
+      "external_instance_id": "REPLACE_WITH_PROVIDER_INSTANCE_ID",
+      "status": "active"
+    }
+  ],
+  "metadata": {
+    "onboarding_state": "draft"
+  }
+}
