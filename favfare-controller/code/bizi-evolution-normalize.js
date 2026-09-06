@@ -22,5 +22,5 @@ const message=String(
 const is_group=remote_jid.endsWith('@g.us');
 const is_status=remote_jid==='status@broadcast';
 const is_message_event=event==='messages.upsert'||event==='messages_upsert'||event==='messages-upsert';
-const process=is_message_event&&!from_me&&!is_group&&!is_status&&Boolean(instance_id)&&Boolean(remote_jid)&&Boolean(message);
+const process=is_message_event&&!from_me&&!is_group&&!is_status&&Boolean(instance_id)&&Boolean(instance_name)&&Boolean(remote_jid)&&Boolean(message);
 return [{json:{process,event,instance_name,instance_id,remote_jid,from_me,is_group,is_status,message_id,push_name,message,raw_event:body}}];
