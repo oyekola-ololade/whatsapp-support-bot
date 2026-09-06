@@ -8,6 +8,7 @@ const N8N_API_KEY = String(process.env.N8N_API_KEY ?? '');
 const N8N_EMAIL = String(process.env.N8N_EMAIL ?? '');
 const N8N_PASSWORD = String(process.env.N8N_PASSWORD ?? '');
 const SYNC_ONLY = new Set(String(process.env.SYNC_ONLY ?? '').split('|').map((s) => s.trim()).filter(Boolean));
+const WATCH_INTERVAL_SECONDS = Math.max(0, Number(process.env.WATCH_INTERVAL_SECONDS ?? 0) || 0);
 if (!N8N_URL) throw new Error('N8N_URL is required');
 
 let mode = 'public';
@@ -61,6 +62,7 @@ async function restApi(endpoint, { method = 'GET', body } = {}) {
 }
 
 async function ensureAuth() {
+  sessionCookie = '';
   if (N8N_API_KEY) {
     const probe = await publicApi('/workflows?limit=1', { allowError: true });
     if (probe.ok) {
@@ -184,16 +186,57 @@ async function syncWorkflow(spec) {
   return syncPublic(spec);
 }
 
-await ensureAuth();
 const here = path.dirname(fileURLToPath(import.meta.url));
 const workflowDir = path.join(here, 'workflows');
 const files = (await fs.readdir(workflowDir)).filter((f) => f.endsWith('.json')).sort();
-let count = 0;
-for (const file of files) {
-  const raw = await fs.readFile(path.join(workflowDir, file), 'utf8');
-  const spec = JSON.parse(raw);
-  if (SYNC_ONLY.size && !SYNC_ONLY.has(spec.name)) continue;
-  await syncWorkflow(await hydrateWorkflow(spec, here));
-  count += 1;
+
+async function runSync(reason = 'manual') {
+  await ensureAuth();
+  let count = 0;
+  for (const file of files) {
+    const raw = await fs.readFile(path.join(workflowDir, file), 'utf8');
+    const spec = JSON.parse(raw);
+    if (SYNC_ONLY.size && !SYNC_ONLY.has(spec.name)) continue;
+    await syncWorkflow(await hydrateWorkflow(spec, here));
+    count += 1;
+  }
+  console.log(`SYNC_COMPLETE count=${count}${SYNC_ONLY.size ? ' filtered=true' : ''} auth=${mode} reason=${reason}`);
 }
-console.log(`SYNC_COMPLETE count=${count}${SYNC_ONLY.size ? ' filtered=true' : ''} auth=${mode}`);
+
+async function demoHealthy() {
+  const urls = [
+    `${N8N_URL}/webhook/favfare-demo/patient?controller_health=1`,
+    `${N8N_URL}/webhook/favfare-demo/crm-ui-v2?controller_health=1`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { method: 'GET', redirect: 'manual' });
+      if (res.status < 200 || res.status >= 400) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
+await runSync('startup');
+
+if (WATCH_INTERVAL_SECONDS > 0) {
+  console.log(`WATCHDOG_READY interval=${WATCH_INTERVAL_SECONDS}s`);
+  let repairing = false;
+  setInterval(async () => {
+    if (repairing) return;
+    const healthy = await demoHealthy();
+    if (healthy) return;
+    repairing = true;
+    console.log('WATCHDOG_DETECTED demo-unhealthy');
+    try {
+      await runSync('watchdog-repair');
+      console.log(`WATCHDOG_REPAIR ${await demoHealthy() ? 'PASS' : 'PENDING'}`);
+    } catch (error) {
+      console.error(`WATCHDOG_REPAIR_FAILED ${error?.message ?? error}`);
+    } finally {
+      repairing = false;
+    }
+  }, WATCH_INTERVAL_SECONDS * 1000);
+}
