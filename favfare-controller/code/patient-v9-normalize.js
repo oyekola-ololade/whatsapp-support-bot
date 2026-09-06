@@ -1,6 +1,6 @@
 const b=$json.body??$json;const s=k=>String(b[k]??'').trim();
 const action=s('action')||'chat',message=s('message'),session_id=(s('session_id')||`demo-${Date.now()}`).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,80);
-const client_key=(s('client_key')||'favfare').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,63)||'favfare';
+const client_key='favfare';
 const base={client_key,action,message,session_id,enquiry_id:s('enquiry_id'),contact_id:s('contact_id'),service_slug:s('service_slug'),service_name:s('service_name'),service_price:s('service_price'),full_name:s('full_name'),phone:s('phone'),email:s('email').toLowerCase(),date:s('date'),time:s('time')};
 let history=[];try{history=JSON.parse(String(b.history??'[]'));if(!Array.isArray(history))history=[]}catch{history=[]}base.history=history;
 const CORE='https://shftukueyostzbyqxmqw.supabase.co/functions/v1';
