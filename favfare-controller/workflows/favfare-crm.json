@@ -18,7 +18,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body ?? $json; const client_key = String(body.client_key ?? 'favfare').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,63) || 'favfare'; return [{ json: { ...body, client_key } }];"
+        "jsCode": "const body = $json.body ?? $json; return [{ json: { ...body, client_key: 'favfare' } }];"
       },
       "id": "d29ce332-3990-4231-910e-5fd2a74c0d40",
       "name": "Normalize CRM Request",
