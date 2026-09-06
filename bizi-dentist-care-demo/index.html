@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071411">
+  <meta name="description" content="Interactive Bizi Dentist Care package demo showing three clinic automation levels.">
+  <title>Bizi Dentist — Care Packages</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Bizi Dentist home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" role="img"><path d="M20 4.4c-6.8 0-12.1 4.7-12.1 11.2 0 4.1 1.9 7 3.6 9.4 1.4 2 2.6 3.7 3 6.2.4 2.6 1.5 4.5 3.2 4.5 1.8 0 2.2-2.2 2.3-4.1.1-1.7.4-3.3 1.2-3.3s1.1 1.6 1.2 3.3c.1 1.9.5 4.1 2.3 4.1 1.7 0 2.8-1.9 3.2-4.5.4-2.5 1.6-4.2 3-6.2 1.7-2.4 3.6-5.3 3.6-9.4C32.1 9.1 26.8 4.4 20 4.4Z" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M14.2 14.5c1.3-2 3.2-3.1 5.8-3.1 2.6 0 4.5 1 5.8 3.1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.3"/></svg>
+      </span>
+      <span><strong>Bizi Dentist</strong><small>Patient operations</small></span>
+    </a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="#packages">Care levels</a>
+      <a href="#demo">Interactive demo</a>
+      <a href="#compare">Compare</a>
+    </nav>
+    <div class="header-pill"><span></span> Product preview</div>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <div class="eyebrow">Bizi Care for dental clinics</div>
+        <h1>Start with fewer missed enquiries.<br><span>Grow into a clinic operating layer.</span></h1>
+        <p class="hero-lede">Three levels. One upgrade path. Every level is built around the same rule: automate repetitive patient operations without pretending the assistant is a dentist.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#demo">Explore the live preview</a>
+          <a class="btn ghost" href="#compare">Compare all 3 levels</a>
+        </div>
+        <div class="hero-proof">
+          <div><strong>WhatsApp-first</strong><span>Meet patients where they already message</span></div>
+          <div><strong>Human handoff</strong><span>Clinical judgement stays with clinic staff</span></div>
+          <div><strong>Modular</strong><span>Upgrade without rebuilding from zero</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="Preview of Bizi patient operations">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="visual-card visual-chat">
+          <div class="visual-head"><span class="avatar">A</span><div><strong>Patient Assistant</strong><small>Online now</small></div><i></i></div>
+          <div class="bubble patient">How much is teeth cleaning?</div>
+          <div class="bubble assistant">Cleaning is ₦20,000–₦25,000. Would you like me to help with an appointment?</div>
+          <div class="typing"><span></span><span></span><span></span></div>
+        </div>
+        <div class="visual-card visual-crm">
+          <div class="mini-label">Enquiry captured</div>
+          <div class="mini-person"><span>TA</span><div><strong>Teni A.</strong><small>Cleaning · WhatsApp</small></div><b>NEW</b></div>
+          <div class="progress"><i></i></div>
+          <div class="mini-row"><span>Next action</span><strong>Confirm slot</strong></div>
+        </div>
+        <div class="visual-card visual-insight">
+          <span class="pulse"></span>
+          <div><small>Automation state</small><strong>Assistant active</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="packages" class="packages-section shell">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">Three care levels</div>
+          <h2>Buy the operational outcome you need now.</h2>
+        </div>
+        <p>Level 1 removes repetitive admin. Level 2 turns conversations into a managed workflow. Level 3 extends that foundation into a custom clinic operations platform.</p>
+      </div>
+
+      <div class="package-grid">
+        <article class="package-card" data-package-card="1">
+          <div class="package-topline"><span>Care Level 1</span><span class="status-chip">Essential</span></div>
+          <h3>Patient Assistant +<br>Simple Enquiry Table</h3>
+          <p class="package-outcome">For clinics that want WhatsApp enquiries handled and captured without adding a custom staff app.</p>
+          <div class="price"><strong>≈ ₦160k</strong><span>setup</span></div>
+          <div class="monthly">+ ≈ ₦40k/month managed</div>
+          <ul>
+            <li>Approved service, price and FAQ answers</li>
+            <li>Lead and service-interest capture</li>
+            <li>Appointment request capture</li>
+            <li>Staff notification and human handoff</li>
+            <li>Simple Airtable/Sheet-style enquiry view</li>
+          </ul>
+          <button class="package-select" data-package="1">Preview Level 1</button>
+        </article>
+
+        <article class="package-card featured" data-package-card="2">
+          <div class="recommend">Recommended starting point</div>
+          <div class="package-topline"><span>Care Level 2</span><span class="status-chip">Operations</span></div>
+          <h3>Patient Assistant +<br>Enquiry CRM</h3>
+          <p class="package-outcome">For clinics that want every useful patient conversation converted into a structured, staff-managed operational record.</p>
+          <div class="price"><strong>≈ ₦300k</strong><span>setup</span></div>
+          <div class="monthly">+ ≈ ₦70k/month managed</div>
+          <ul>
+            <li>Everything in Care Level 1</li>
+            <li>Branded staff CRM and activity history</li>
+            <li>Availability-aware booking checks</li>
+            <li>Structured follow-up engine</li>
+            <li>Website + WhatsApp enquiries in one workflow</li>
+          </ul>
+          <button class="package-select active" data-package="2">Preview Level 2</button>
+        </article>
+
+        <article class="package-card" data-package-card="3">
+          <div class="package-topline"><span>Care Level 3</span><span class="status-chip">Custom</span></div>
+          <h3>Custom Clinic<br>Operations Platform</h3>
+          <p class="package-outcome">For clinics whose operations have outgrown a lightweight CRM and need custom modules, deeper control and broader automation.</p>
+          <div class="price"><strong>Custom quote</strong><span>after discovery</span></div>
+          <div class="monthly">Scope and support matched to the build</div>
+          <ul>
+            <li>Everything in Care Level 2</li>
+            <li>Advanced scheduling and calendar sync</li>
+            <li>Roles, permissions and multi-location support</li>
+            <li>Analytics, payments and lifecycle automation</li>
+            <li>Custom operational modules</li>
+          </ul>
+          <button class="package-select" data-package="3">Preview Level 3</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+      <div class="shell">
+        <div class="section-heading demo-heading">
+          <div>
+            <div class="eyebrow">Interactive product preview</div>
+            <h2>See what changes as the care level increases.</h2>
+          </div>
+          <div class="demo-tabs" role="tablist" aria-label="Care level preview">
+            <button role="tab" aria-selected="false" data-package="1"><span>01</span> Essential</button>
+            <button role="tab" aria-selected="true" class="active" data-package="2"><span>02</span> Operations</button>
+            <button role="tab" aria-selected="false" data-package="3"><span>03</span> Custom</button>
+          </div>
+        </div>
+
+        <div class="demo-shell">
+          <div class="demo-toolbar">
+            <div class="window-controls"><i></i><i></i><i></i></div>
+            <div class="demo-title"><span class="live-dot"></span><strong id="demoPackageTitle">Care Level 2 · Operations</strong><small id="demoPackageSubtitle">Patient Assistant + Enquiry CRM</small></div>
+            <button id="resetDemo" class="reset-btn" title="Reset preview">Reset</button>
+          </div>
+
+          <div class="demo-workspace">
+            <aside class="demo-sidebar">
+              <div class="clinic-badge"><span>BD</span><div><strong>Bizi Dental Studio</strong><small>Demo clinic</small></div></div>
+              <button class="side-item active" data-view="inbox"><span class="side-icon">◉</span>Patient Inbox <b id="inboxBadge">3</b></button>
+              <button class="side-item" data-view="operations"><span class="side-icon">▦</span><span id="operationsLabel">Enquiries</span></button>
+              <button class="side-item" data-view="schedule"><span class="side-icon">◫</span>Schedule</button>
+              <button class="side-item" data-view="insights"><span class="side-icon">↗</span>Insights</button>
+              <div class="side-divider"></div>
+              <div class="package-capability" id="packageCapability">
+                <small>Current package</small>
+                <strong>Care Level 2</strong>
+                <span>Branded CRM + booking + follow-up</span>
+              </div>
+            </aside>
+
+            <div class="view-stack">
+              <section class="workspace-view active" data-view-panel="inbox">
+                <div class="inbox-layout">
+                  <div class="conversation-list">
+                    <div class="panel-head"><div><strong>Patient inbox</strong><small>Synthetic demo conversations</small></div><span>Today</span></div>
+                    <button class="conversation active" data-conversation="teni"><span class="contact-avatar">TA</span><div><strong>Teni A.</strong><small>Can I book cleaning tomorrow?</small></div><time>11:42</time></button>
+                    <button class="conversation" data-conversation="mike"><span class="contact-avatar">MO</span><div><strong>Michael O.</strong><small>How much is whitening?</small></div><time>10:18</time></button>
+                    <button class="conversation" data-conversation="zara"><span class="contact-avatar">ZA</span><div><strong>Zara A.</strong><small>My tooth is swollen...</small></div><time>09:51</time></button>
+                  </div>
+
+                  <div class="chat-panel">
+                    <div class="chat-head"><div class="chat-person"><span class="contact-avatar">TA</span><div><strong>Teni A.</strong><small>WhatsApp · New enquiry</small></div></div><span class="automation-chip" id="automationChip">Assistant active</span></div>
+                    <div class="chat-thread" id="chatThread" aria-live="polite"></div>
+                    <div class="suggested-actions" id="suggestedActions"></div>
+                    <div class="composer"><span>Message handled by Bizi Patient Assistant</span><button id="advanceChat">Run next step</button></div>
+                  </div>
+
+                  <div class="context-panel" id="contextPanel"></div>
+                </div>
+              </section>
+
+              <section class="workspace-view" data-view-panel="operations">
+                <div class="ops-page">
+                  <div class="page-title"><div><small id="opsEyebrow">Care Level 2</small><h3 id="opsTitle">Enquiry CRM</h3><p id="opsDescription">Every useful patient interaction becomes a staff-manageable record.</p></div><span class="screen-tag" id="opsScreenTag">LIVE PREVIEW</span></div>
+                  <div class="metric-grid" id="metricGrid"></div>
+                  <div class="ops-grid">
+                    <div class="ops-card wide">
+                      <div class="ops-card-head"><div><strong id="recordsTitle">Recent enquiries</strong><small id="recordsSubtitle">Captured from WhatsApp and website</small></div><button>Filter</button></div>
+                      <div class="data-table" id="recordsTable"></div>
+                    </div>
+                    <div class="ops-card">
+                      <div class="ops-card-head"><div><strong id="workflowTitle">Workflow state</strong><small>What happens next</small></div></div>
+                      <div class="workflow" id="workflowList"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="workspace-view" data-view-panel="schedule">
+                <div class="ops-page">
+                  <div class="page-title"><div><small>Scheduling layer</small><h3 id="scheduleTitle">Availability-aware booking</h3><p id="scheduleDescription">Care Level 2 checks defined clinic rules before confirming a slot.</p></div><span class="screen-tag" id="scheduleTag">LEVEL 2</span></div>
+                  <div class="calendar-shell">
+                    <div class="calendar-head"><button>‹</button><div><strong>September 2026</strong><small>Demo availability</small></div><button>›</button></div>
+                    <div class="weekday"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                  </div>
+                  <div class="schedule-lower" id="scheduleLower"></div>
+                </div>
+              </section>
+
+              <section class="workspace-view" data-view-panel="insights">
+                <div class="ops-page">
+                  <div class="page-title"><div><small>Visibility</small><h3 id="insightsTitle">Operational pulse</h3><p id="insightsDescription">A lightweight view of the work moving through the clinic.</p></div><span class="screen-tag" id="insightsTag">LEVEL 2</span></div>
+                  <div class="insight-grid" id="insightGrid"></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+        <div class="truth-note"><span>i</span><p><strong>Truth boundary:</strong> this preview uses synthetic patient data. Care Levels describe the commercial product scope. The Patient Assistant is for patient operations, not diagnosis, prescribing or clinical records.</p></div>
+      </div>
+    </section>
+
+    <section class="upgrade-section shell">
+      <div class="section-heading">
+        <div><div class="eyebrow">One foundation, progressive capability</div><h2>The upgrade path is deliberate.</h2></div>
+        <p>Care Level 2 does not throw away Level 1. Care Level 3 does not throw away Level 2. Each level extends the same patient-operations foundation.</p>
+      </div>
+      <div class="upgrade-track">
+        <div class="upgrade-node"><span>01</span><div><strong>Capture</strong><p>Answer approved questions, collect enquiries, hand off safely.</p></div></div>
+        <div class="upgrade-arrow">→</div>
+        <div class="upgrade-node active"><span>02</span><div><strong>Operate</strong><p>Manage booking state, follow-up, staff actions and activity history.</p></div></div>
+        <div class="upgrade-arrow">→</div>
+        <div class="upgrade-node"><span>03</span><div><strong>Orchestrate</strong><p>Extend into deeper scheduling, analytics, locations and custom modules.</p></div></div>
+      </div>
+    </section>
+
+    <section id="compare" class="compare-section shell">
+      <div class="section-heading">
+        <div><div class="eyebrow">Side-by-side</div><h2>What each care level actually includes.</h2></div>
+        <p>No vague “AI package” language. The difference is operational capability.</p>
+      </div>
+      <div class="comparison-wrap">
+        <table class="comparison-table">
+          <thead><tr><th>Capability</th><th><span>Care 1</span>Essential</th><th class="recommended-col"><span>Care 2</span>Operations <b>Recommended</b></th><th><span>Care 3</span>Custom</th></tr></thead>
+          <tbody>
+            <tr><td>WhatsApp Patient Assistant</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Approved services, prices & FAQs</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Human / clinical handoff</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Simple enquiry table</td><td class="yes">✓</td><td><span class="upgrade-label">Upgraded</span></td><td><span class="upgrade-label">Upgraded</span></td></tr>
+            <tr><td>Branded staff CRM</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Availability-aware booking</td><td><span class="limited">Request only</span></td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Automated follow-up engine</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Activity timeline & staff actions</td><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Website + WhatsApp intake</td><td><span class="limited">Optional scope</span></td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Advanced scheduling / calendar sync</td><td class="no">—</td><td class="no">—</td><td class="yes">Custom</td></tr>
+            <tr><td>Roles, permissions & multi-location</td><td class="no">—</td><td class="no">—</td><td class="yes">Custom</td></tr>
+            <tr><td>Analytics, payments & custom modules</td><td class="no">—</td><td class="no">—</td><td class="yes">Custom</td></tr>
+            <tr class="price-row"><td>Commercial starting point</td><td><strong>≈ ₦160k setup</strong><small>+ ≈ ₦40k/mo managed</small></td><td><strong>≈ ₦300k setup</strong><small>+ ≈ ₦70k/mo managed</small></td><td><strong>Custom quote</strong><small>after discovery</small></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="close-section shell">
+      <div class="close-card">
+        <div>
+          <div class="eyebrow">Recommended for most growing clinics</div>
+          <h2>Care Level 2 is where automation becomes operations.</h2>
+          <p>It keeps the patient-facing experience simple, while giving staff a structured CRM, booking state, follow-up controls, human takeover and activity history behind the scenes.</p>
+        </div>
+        <div class="close-summary">
+          <span>Care Level 2</span>
+          <strong>≈ ₦300,000 setup</strong>
+          <small>+ ≈ ₦70,000/month managed</small>
+          <a href="#demo" class="btn primary">Replay Level 2 preview</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <div><strong>Bizi Dentist</strong><span>by Bizi Systems</span></div>
+      <p>Patient operations, not clinical judgement.</p>
+      <span>Interactive commercial preview · Synthetic data</span>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
