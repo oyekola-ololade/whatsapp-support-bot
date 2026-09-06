@@ -1,0 +1,261 @@
+{
+  "name": "Bizi Core — Evolution WhatsApp Gateway",
+  "active": true,
+  "controller": {
+    "embed_code_files": {
+      "Normalize Evolution Event": "code/bizi-evolution-normalize.js"
+    }
+  },
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bizi/evolution/whatsapp",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ce6f8620-99f6-42a6-a761-29d8601fa3ef",
+      "name": "Evolution Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-900, 0],
+      "webhookId": "1f6f2947-2067-4dde-a961-fd5ccefc3a9c"
+    },
+    {
+      "parameters": {
+        "jsCode": "__BIZI_EVOLUTION_NORMALIZE__"
+      },
+      "id": "ce061700-309a-467a-bfb1-b1193f2d813b",
+      "name": "Normalize Evolution Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-680, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "9f131eca-acde-4c89-b898-aa9063a8fc47",
+              "leftValue": "={{ $json.process ? 1 : 0 }}",
+              "rightValue": 1,
+              "operator": {"type": "number", "operation": "gte"}
+            }
+          ]
+        }
+      },
+      "id": "7e5cd678-384d-4b5d-bc94-27c80a6a2b95",
+      "name": "Process Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-470, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/bizi-core-router",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-bizi-core-key", "value": "={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: 'resolve_channel', provider: 'evolution_api', external_instance_id: $json.instance_id }) }}",
+        "options": {"response": {"response": {"neverError": true, "responseFormat": "json"}}}
+      },
+      "id": "34de2c95-e584-434a-a556-59760a654792",
+      "name": "Resolve Bizi Channel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-240, -110]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "16704f1d-514c-4ed2-a7e5-475457c2d35f",
+              "leftValue": "={{ $json.ok ? 1 : 0 }}",
+              "rightValue": 1,
+              "operator": {"type": "number", "operation": "gte"}
+            }
+          ]
+        }
+      },
+      "id": "35280376-4cd4-4c3e-9549-f583f1d10c62",
+      "name": "Channel Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-20, -110]
+    },
+    {
+      "parameters": {
+        "jsCode": "const n=$('Normalize Evolution Event').first().json;const r=$json;return [{json:{action:'process_inbound',client_key:r.client_key,channel_id:r.channel.id,remote_jid:n.remote_jid,message:n.message,message_id:n.message_id,push_name:n.push_name,instance_name:n.instance_name,is_demo:r.channel?.config?.is_demo===true}}];"
+      },
+      "id": "381c5cdf-8b51-43f5-8da0-fc8287f73172",
+      "name": "Build Client Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, -170]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/bizi-core-whatsapp",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-bizi-core-key", "value": "={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {"response": {"response": {"neverError": true, "responseFormat": "json"}}}
+      },
+      "id": "e568536b-cbd4-41d4-955b-b7f2feec7dbc",
+      "name": "Process WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [430, -170]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict"},
+          "conditions": [
+            {
+              "id": "4520775c-2d3d-4cfb-8eda-a7bcfa2e6d12",
+              "leftValue": "={{ ($json.send === true && $('Normalize Evolution Event').first().json.dry_run !== true) ? 1 : 0 }}",
+              "rightValue": 1,
+              "operator": {"type": "number", "operation": "gte"}
+            }
+          ]
+        }
+      },
+      "id": "5d0cd84d-66c7-47ef-bc0c-5324aeab84c1",
+      "name": "Send Reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, -170]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL.replace(/\\/$/,'') + '/message/sendText/' + $('Normalize Evolution Event').first().json.instance_name }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{ $env.EVOLUTION_API_KEY }}"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Normalize Evolution Event').first().json.remote_jid.replace(/@s\\.whatsapp\\.net$/,''), text: $('Process WhatsApp').first().json.reply }) }}",
+        "options": {"response": {"response": {"neverError": true, "responseFormat": "json"}}}
+      },
+      "id": "a4c10159-5321-428d-beb5-caf09af72b3d",
+      "name": "Send Evolution Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, -250]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e=$json??{},p=$('Process WhatsApp').first().json,n=$('Normalize Evolution Event').first().json;const id=String(e?.key?.id??e?.data?.key?.id??e?.message?.key?.id??`evo-out-${n.message_id||Date.now()}`);return [{json:{action:'record_outbound',client_key:p.client_key,channel_id:p.channel_id,outbound_message_id:id,remote_jid:n.remote_jid,reply:p.reply,source_inbound_id:p.source_inbound_id}}];"
+      },
+      "id": "332deacb-cb5a-4bb8-a494-8a65b55db5e5",
+      "name": "Build Outbound Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, -250]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/bizi-core-whatsapp",
+        "authentication": "none",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-bizi-core-key", "value": "={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {"response": {"response": {"neverError": true, "responseFormat": "json"}}}
+      },
+      "id": "63fc7e61-4cea-4357-a84a-3eb18889acb6",
+      "name": "Record Outbound",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, -250]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, accepted: false, reason: $json.error || 'ignored_event' } }}",
+        "options": {}
+      },
+      "id": "96ba5f25-394a-4d51-a53f-7bb9adcf70d4",
+      "name": "Respond Ignored",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [220, 130]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: $json.ok !== false, accepted: true, sent: false, dry_run: $('Normalize Evolution Event').first().json.dry_run === true, result: $json } }}",
+        "options": {}
+      },
+      "id": "df05ca9d-50e0-4557-b8b8-b98ad98c18b4",
+      "name": "Respond No Send",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [900, -70]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: $json.ok !== false, accepted: true, sent: true, result: $json } }}",
+        "options": {}
+      },
+      "id": "953df69a-469c-40d2-bf1f-89cb777a64e0",
+      "name": "Respond Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1580, -250]
+    }
+  ],
+  "connections": {
+    "Evolution Webhook": {"main": [[{"node": "Normalize Evolution Event", "type": "main", "index": 0}]]},
+    "Normalize Evolution Event": {"main": [[{"node": "Process Event?", "type": "main", "index": 0}]]},
+    "Process Event?": {"main": [[{"node": "Resolve Bizi Channel", "type": "main", "index": 0}], [{"node": "Respond Ignored", "type": "main", "index": 0}]]},
+    "Resolve Bizi Channel": {"main": [[{"node": "Channel Found?", "type": "main", "index": 0}]]},
+    "Channel Found?": {"main": [[{"node": "Build Client Event", "type": "main", "index": 0}], [{"node": "Respond Ignored", "type": "main", "index": 0}]]},
+    "Build Client Event": {"main": [[{"node": "Process WhatsApp", "type": "main", "index": 0}]]},
+    "Process WhatsApp": {"main": [[{"node": "Send Reply?", "type": "main", "index": 0}]]},
+    "Send Reply?": {"main": [[{"node": "Send Evolution Reply", "type": "main", "index": 0}], [{"node": "Respond No Send", "type": "main", "index": 0}]]},
+    "Send Evolution Reply": {"main": [[{"node": "Build Outbound Log", "type": "main", "index": 0}]]},
+    "Build Outbound Log": {"main": [[{"node": "Record Outbound", "type": "main", "index": 0}]]},
+    "Record Outbound": {"main": [[{"node": "Respond Sent", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}
