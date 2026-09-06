@@ -7,7 +7,7 @@ const dryGateSource = '  const dry=GLOBAL_DRY_RUN||forceDryRun||n.dry_run;';
 const dryGateReplacement = `  const outboundNumber=String(n.remote_jid||'').split('@')[0].replace(/\\D/g,'');
   const allowlist=String(process.env.OUTBOUND_TEST_ALLOWLIST||'').split(',').map(x=>x.replace(/\\D/g,'')).filter(Boolean);
   const testAllowed=allowlist.includes(outboundNumber);
-  const dry=forceDryRun||n.dry_run||(GLOBAL_DRY_RUN&&!testAllowed);
+  const dry=forceDryRun||n.dry_run||!testAllowed;
   console.log('OUTBOUND_POLICY',JSON.stringify({outbound_number:outboundNumber,test_allowed:testAllowed,dry,send_requested:proc.data.send===true}));`;
 
 if (!source.includes(dryGateSource)) {
