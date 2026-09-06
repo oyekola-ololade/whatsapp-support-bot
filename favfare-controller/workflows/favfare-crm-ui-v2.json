@@ -1,0 +1,45 @@
+{
+  "name": "Favfare Demo — CRM UI V2",
+  "active": true,
+  "controller": {"embed_html_file": "ui/index.html"},
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "favfare-demo/crm-ui-v2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bfc1667d-df54-4e9d-8dc1-99f3a53bac19",
+      "name": "CRM UI V2 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-180, 0],
+      "webhookId": "77c6130c-79f9-4f60-b9f2-77864bf4ce5c"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "__FAVFARE_EMBED_HTML__",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {"name": "Content-Type", "value": "text/html; charset=utf-8"},
+              {"name": "Cache-Control", "value": "no-store"},
+              {"name": "X-Content-Type-Options", "value": "nosniff"}
+            ]
+          }
+        }
+      },
+      "id": "10ac8082-e3a1-49fc-8aca-64b106d54ff9",
+      "name": "Respond CRM UI V2",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [80, 0]
+    }
+  ],
+  "connections": {
+    "CRM UI V2 Webhook": {"main": [[{"node": "Respond CRM UI V2", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"}
+}
