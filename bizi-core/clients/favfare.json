@@ -1,0 +1,45 @@
+{
+  "client_key": "favfare",
+  "display_name": "Favfare The Clinic",
+  "vertical": "dental_clinic",
+  "timezone": "Africa/Lagos",
+  "locale": "en-NG",
+  "currency": "NGN",
+  "branding": {
+    "brand_name": "Favfare",
+    "accent": "#26705b",
+    "surface": "#fffdfa"
+  },
+  "assistant_config": {
+    "channel_style": "whatsapp",
+    "tone": "concise_natural_receptionist",
+    "clinical_advice_allowed": false
+  },
+  "handoff_config": {
+    "clinical_uncertainty": "human",
+    "staff_takeover_enabled": true,
+    "assistant_resume_enabled": true
+  },
+  "channels": [
+    {
+      "channel_type": "web_chat",
+      "provider": "n8n_demo",
+      "external_instance_id": "favfare-demo",
+      "status": "active",
+      "config": {
+        "crm_path": "/webhook/favfare-demo/crm",
+        "patient_path": "/webhook/favfare-demo/patient"
+      }
+    },
+    {
+      "channel_type": "whatsapp",
+      "provider": "evolution_api",
+      "external_instance_id": "9c3fab9e-a197-4af2-904b-f83e760298ae",
+      "status": "active"
+    }
+  ],
+  "metadata": {
+    "source": "Favfare demo",
+    "migration_stage": "bizi_core_v1"
+  }
+}
