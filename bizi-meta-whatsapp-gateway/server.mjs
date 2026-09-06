@@ -6,6 +6,7 @@ const CORE = String(process.env.BIZI_CORE_URL || 'https://shftukueyostzbyqxmqw.s
 const CORE_KEY = String(process.env.BIZI_CORE_KEY || '');
 const META_TOKEN = String(process.env.META_ACCESS_TOKEN || '');
 const META_PHONE_ID = String(process.env.META_PHONE_NUMBER_ID || '');
+const META_WABA_ID = String(process.env.META_WABA_ID || '');
 const META_VERIFY_TOKEN = String(process.env.META_VERIFY_TOKEN || 'bizi-meta-test-webhook-v1');
 const META_APP_SECRET = String(process.env.META_APP_SECRET || '');
 const META_REQUIRE_SIGNATURE = String(process.env.META_REQUIRE_SIGNATURE || 'false') === 'true';
@@ -51,6 +52,14 @@ async function core(path, body, extraHeaders={}){
     method:'POST',
     headers:{'content-type':'application/json','x-bizi-core-key':CORE_KEY,...extraHeaders},
     body:JSON.stringify(body)
+  });
+}
+
+async function subscribeWaba(){
+  if(!META_TOKEN || !META_WABA_ID) return {ok:false,status:409,data:{error:'meta_waba_credentials_missing'}};
+  return api(`https://graph.facebook.com/${encodeURIComponent(GRAPH_VERSION)}/${encodeURIComponent(META_WABA_ID)}/subscribed_apps`,{
+    method:'POST',
+    headers:{Authorization:`Bearer ${META_TOKEN}`,'content-type':'application/json'}
   });
 }
 
@@ -133,7 +142,7 @@ async function processMeta(payload){
 const server=http.createServer(async (req,res)=>{
   try{
     const u=new URL(req.url,'http://localhost');
-    if(req.method==='GET'&&u.pathname==='/health') return json(res,200,{ok:true,service:'bizi-meta-whatsapp-gateway',version:1,core_key_configured:Boolean(CORE_KEY),meta_token_configured:Boolean(META_TOKEN),phone_number_id_configured:Boolean(META_PHONE_ID),signature_required:META_REQUIRE_SIGNATURE});
+    if(req.method==='GET'&&u.pathname==='/health') return json(res,200,{ok:true,service:'bizi-meta-whatsapp-gateway',version:2,core_key_configured:Boolean(CORE_KEY),meta_token_configured:Boolean(META_TOKEN),phone_number_id_configured:Boolean(META_PHONE_ID),waba_id_configured:Boolean(META_WABA_ID),signature_required:META_REQUIRE_SIGNATURE});
     if(req.method==='GET'&&u.pathname==='/webhook/meta'){
       const mode=u.searchParams.get('hub.mode'),token=u.searchParams.get('hub.verify_token'),challenge=u.searchParams.get('hub.challenge');
       if(mode==='subscribe'&&token===META_VERIFY_TOKEN&&challenge) return text(res,200,challenge);
@@ -152,7 +161,13 @@ const server=http.createServer(async (req,res)=>{
 });
 
 server.listen(PORT,()=>{
-  console.log('BIZI_META_GATEWAY_READY',PORT,JSON.stringify({meta_token:Boolean(META_TOKEN),phone_id:Boolean(META_PHONE_ID),signature_required:META_REQUIRE_SIGNATURE}));
+  console.log('BIZI_META_GATEWAY_READY',PORT,JSON.stringify({meta_token:Boolean(META_TOKEN),phone_id:Boolean(META_PHONE_ID),waba_id:Boolean(META_WABA_ID),signature_required:META_REQUIRE_SIGNATURE}));
+  if(META_TOKEN && META_WABA_ID){
+    setTimeout(async()=>{
+      const r=await subscribeWaba();
+      console.log('META_WABA_SUBSCRIBE_RESULT',JSON.stringify({ok:r.ok,status:r.status,success:r.data?.success===true,error:r.ok?null:r.data}));
+    },2000);
+  }
   if(RUN_BUTTON_TEST&&TEST_RECIPIENT){
     setTimeout(async()=>{
       const r=await sendMeta({to:TEST_RECIPIENT,textBody:'Favfare Cloud API button test',choices:[{label:'View services',value:'view_services'},{label:'Book appointment',value:'book_appointment'},{label:'Talk to staff',value:'talk_to_staff'}]});
