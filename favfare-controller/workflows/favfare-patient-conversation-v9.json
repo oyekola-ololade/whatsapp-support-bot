@@ -1,0 +1,19 @@
+{
+  "name": "Favfare Demo — Patient Conversation V9",
+  "active": true,
+  "controller": {
+    "embed_code_files": {
+      "Normalize V9": "code/patient-v9-normalize.js",
+      "Render V9": "code/patient-v9-render.js"
+    }
+  },
+  "nodes": [
+    {"parameters":{"httpMethod":"POST","path":"favfare-demo/patient-action-v9","responseMode":"responseNode","options":{}},"id":"ad14ae98-0c02-4cb3-b6a6-d43a48c7a16e","name":"Patient Conversation V9","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-520,0],"webhookId":"9ab5d532-cb33-4c30-82aa-4369ba82a38f"},
+    {"parameters":{"jsCode":"__FAVFARE_NORMALIZE_V9__"},"id":"9cf5b7ca-c27c-497c-96d4-9d4b167d4fbf","name":"Normalize V9","type":"n8n-nodes-base.code","typeVersion":2,"position":[-300,0]},
+    {"parameters":{"method":"POST","url":"={{ $json.api_url }}","authentication":"none","sendHeaders":true,"specifyHeaders":"keypair","headerParameters":{"parameters":[{"name":"x-favfare-demo-key","value":"={{ $env.FAVFARE_DATA_GATEWAY_KEY }}"},{"name":"x-groq-key","value":"={{ $json.action === 'chat' ? ($env.GROQ_API_KEY || '') : '' }}"}]},"sendBody":true,"contentType":"json","specifyBody":"json","jsonBody":"={{ JSON.stringify($json.payload) }}","options":{"response":{"response":{"neverError":true,"responseFormat":"json"}}}},"id":"679ab895-72d5-4c4a-b637-43173ca0ac70","name":"Run V9 Tool","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[-60,0]},
+    {"parameters":{"jsCode":"__FAVFARE_RENDER_V9__"},"id":"f8fe859f-1eb8-4d61-88ce-cffef17ed2bc","name":"Render V9","type":"n8n-nodes-base.code","typeVersion":2,"position":[180,0]},
+    {"parameters":{"respondWith":"text","responseBody":"={{ $json.html }}","options":{"responseHeaders":{"entries":[{"name":"Content-Type","value":"text/html; charset=utf-8"},{"name":"Cache-Control","value":"no-store"}]}}},"id":"0ce4ad9d-d215-4e2a-9822-77eab0c20369","name":"Return V9","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.5,"position":[420,0]}
+  ],
+  "connections":{"Patient Conversation V9":{"main":[[{"node":"Normalize V9","type":"main","index":0}]]},"Normalize V9":{"main":[[{"node":"Run V9 Tool","type":"main","index":0}]]},"Run V9 Tool":{"main":[[{"node":"Render V9","type":"main","index":0}]]},"Render V9":{"main":[[{"node":"Return V9","type":"main","index":0}]]}},
+  "settings":{"executionOrder":"v1"}
+}
