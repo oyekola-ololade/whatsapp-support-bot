@@ -26,16 +26,25 @@ function writableWorkflow(spec) {
 
 async function hydrateWorkflow(spec, here) {
   const htmlFile = spec?.controller?.embed_html_file;
-  if (!htmlFile) return spec;
-  const html = await fs.readFile(path.join(here, htmlFile), 'utf8');
-  let injected = false;
-  for (const node of spec.nodes ?? []) {
-    if (node?.parameters?.responseBody === '__FAVFARE_EMBED_HTML__') {
-      node.parameters.responseBody = html;
-      injected = true;
+  if (htmlFile) {
+    const html = await fs.readFile(path.join(here, htmlFile), 'utf8');
+    let injected = false;
+    for (const node of spec.nodes ?? []) {
+      if (node?.parameters?.responseBody === '__FAVFARE_EMBED_HTML__') {
+        node.parameters.responseBody = html;
+        injected = true;
+      }
     }
+    if (!injected) throw new Error(`No HTML placeholder found in ${spec.name}`);
   }
-  if (!injected) throw new Error(`No HTML placeholder found in ${spec.name}`);
+
+  const codeFiles = spec?.controller?.embed_code_files ?? {};
+  for (const [nodeName, file] of Object.entries(codeFiles)) {
+    const node = (spec.nodes ?? []).find((n) => n?.name === nodeName);
+    if (!node) throw new Error(`Code target node not found: ${nodeName} in ${spec.name}`);
+    if (!node.parameters) node.parameters = {};
+    node.parameters.jsCode = await fs.readFile(path.join(here, String(file)), 'utf8');
+  }
   return spec;
 }
 
