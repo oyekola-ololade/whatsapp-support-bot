@@ -53,3 +53,34 @@ console.log('RUNTIME_GATE_PATCH_APPLIED', JSON.stringify({
 }));
 
 await import('./bootstrap.mjs');
+
+if (String(process.env.RUN_ASSISTANT_SMOKE_TEST || 'false') === 'true') {
+  setTimeout(async () => {
+    try {
+      const base = String(process.env.BIZI_CORE_URL || 'https://shftukueyostzbyqxmqw.supabase.co/functions/v1').replace(/\/$/, '');
+      const r = await fetch(`${base}/bizi-core-assistant`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-bizi-core-key': String(process.env.BIZI_CORE_KEY || '')
+        },
+        body: JSON.stringify({
+          client_key: 'favfare',
+          action: 'chat',
+          message: 'Hi, how much is teeth whitening?',
+          is_demo: true
+        })
+      });
+      const body = await r.json().catch(() => ({}));
+      console.log('ASSISTANT_SMOKE_TEST', JSON.stringify({
+        status: r.status,
+        ok: body?.ok === true,
+        provider: body?.provider || null,
+        reply: body?.reply || null,
+        choices: Array.isArray(body?.choices) ? body.choices : []
+      }));
+    } catch (e) {
+      console.log('ASSISTANT_SMOKE_TEST_FAILED', e?.message || 'unknown');
+    }
+  }, 7000);
+}
