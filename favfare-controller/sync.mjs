@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const N8N_URL = String(process.env.N8N_URL ?? '').replace(/\/$/, '');
 const N8N_API_KEY = String(process.env.N8N_API_KEY ?? '');
+const SYNC_ONLY = new Set(String(process.env.SYNC_ONLY ?? '').split('|').map((s) => s.trim()).filter(Boolean));
 if (!N8N_URL) throw new Error('N8N_URL is required');
 if (!N8N_API_KEY) throw new Error('N8N_API_KEY is required');
 
@@ -27,7 +28,15 @@ function writableWorkflow(spec) {
 async function hydrateWorkflow(spec, here) {
   const htmlFile = spec?.controller?.embed_html_file;
   if (htmlFile) {
-    const html = await fs.readFile(path.join(here, htmlFile), 'utf8');
+    let html = await fs.readFile(path.join(here, htmlFile), 'utf8');
+
+    if (spec.name === 'Favfare Demo — CRM UI V2') {
+      const mobileCss = await fs.readFile(path.join(here, 'ui/crm-mobile.css'), 'utf8');
+      const anchor = html.lastIndexOf('</style>');
+      if (anchor < 0) throw new Error(`No style anchor found in ${spec.name}`);
+      html = html.slice(0, anchor) + `\n${mobileCss}\n` + html.slice(anchor);
+    }
+
     let injected = false;
     for (const node of spec.nodes ?? []) {
       if (node?.parameters?.responseBody === '__FAVFARE_EMBED_HTML__') {
@@ -36,6 +45,15 @@ async function hydrateWorkflow(spec, here) {
       }
     }
     if (!injected) throw new Error(`No HTML placeholder found in ${spec.name}`);
+  }
+
+  if (spec.name === 'Favfare Demo — Patient Simulator') {
+    const mobileCss = await fs.readFile(path.join(here, 'ui/patient-mobile.css'), 'utf8');
+    const node = (spec.nodes ?? []).find((n) => n?.name === 'Render Initial Conversation');
+    if (!node?.parameters?.jsCode) throw new Error(`Patient simulator render node not found in ${spec.name}`);
+    const anchor = '</style></head>';
+    if (!node.parameters.jsCode.includes(anchor)) throw new Error(`No patient style anchor found in ${spec.name}`);
+    node.parameters.jsCode = node.parameters.jsCode.replace(anchor, `\n${mobileCss}\n${anchor}`);
   }
 
   const codeFiles = spec?.controller?.embed_code_files ?? {};
@@ -83,9 +101,12 @@ async function syncWorkflow(spec) {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const workflowDir = path.join(here, 'workflows');
 const files = (await fs.readdir(workflowDir)).filter((f) => f.endsWith('.json')).sort();
+let count = 0;
 for (const file of files) {
   const raw = await fs.readFile(path.join(workflowDir, file), 'utf8');
-  const spec = await hydrateWorkflow(JSON.parse(raw), here);
-  await syncWorkflow(spec);
+  const spec = JSON.parse(raw);
+  if (SYNC_ONLY.size && !SYNC_ONLY.has(spec.name)) continue;
+  await syncWorkflow(await hydrateWorkflow(spec, here));
+  count += 1;
 }
-console.log(`SYNC_COMPLETE count=${files.length}`);
+console.log(`SYNC_COMPLETE count=${count}${SYNC_ONLY.size ? ' filtered=true' : ''}`);
