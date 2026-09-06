@@ -18,7 +18,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $json.body ?? $json; return [{ json: body }];"
+        "jsCode": "const body = $json.body ?? $json; const client_key = String(body.client_key ?? 'favfare').trim().toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,63) || 'favfare'; return [{ json: { ...body, client_key } }];"
       },
       "id": "d29ce332-3990-4231-910e-5fd2a74c0d40",
       "name": "Normalize CRM Request",
@@ -29,7 +29,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/favfare-demo-crm",
+        "url": "https://shftukueyostzbyqxmqw.supabase.co/functions/v1/bizi-core-crm",
         "authentication": "none",
         "sendHeaders": true,
         "specifyHeaders": "keypair",
@@ -55,7 +55,7 @@
         }
       },
       "id": "56dc3e9f-70e0-49ce-a89f-e33cd63ef6da",
-      "name": "Favfare CRM Gateway",
+      "name": "Bizi Core CRM Gateway",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [60, 0]
@@ -78,9 +78,9 @@
       "main": [[{"node": "Normalize CRM Request", "type": "main", "index": 0}]]
     },
     "Normalize CRM Request": {
-      "main": [[{"node": "Favfare CRM Gateway", "type": "main", "index": 0}]]
+      "main": [[{"node": "Bizi Core CRM Gateway", "type": "main", "index": 0}]]
     },
-    "Favfare CRM Gateway": {
+    "Bizi Core CRM Gateway": {
       "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
     }
   },
