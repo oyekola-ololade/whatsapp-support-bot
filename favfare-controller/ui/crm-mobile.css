@@ -1,0 +1,59 @@
+/* favfare-mobile-v1 */
+@media(max-width:620px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+  .app{display:block;min-height:100dvh}
+  .sidebar{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;z-index:40;padding:6px 7px calc(6px + env(safe-area-inset-bottom));background:#101915;border-top:1px solid rgba(255,255,255,.08)}
+  .brand,.sidefoot{display:none}
+  .nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;overflow:visible}
+  .nav button{min-width:0;width:100%;padding:7px 2px;border-radius:9px;display:flex;flex-direction:column;justify-content:center;gap:3px;text-align:center;font-size:10px;line-height:1.05;white-space:normal}
+  .dot{width:6px;height:6px;flex:0 0 6px}
+  .main{min-width:0}
+  .topbar{height:60px;position:sticky;top:0;z-index:30;padding:0 12px;background:rgba(244,243,239,.97);backdrop-filter:blur(10px)}
+  .crumb{min-width:0}
+  .crumb strong{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crumb span{display:none}
+  .top-actions{gap:6px;flex:0 0 auto}
+  .top-actions .demo-badge{display:none}
+  .icon-btn{padding:8px 9px;border-radius:10px;font-size:11px;white-space:nowrap}
+  #refresh{width:36px;height:36px;padding:0;font-size:0;display:grid;place-items:center}
+  #refresh:after{content:"↻";font-size:18px;line-height:1}
+  .content{padding:16px 11px 26px}
+  .hero{display:block;margin-bottom:15px}
+  .hero h2{font-size:25px;margin-bottom:5px}
+  .hero p{font-size:12px;line-height:1.45}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .metric{padding:13px}
+  .metric .label{font-size:10px}
+  .metric .num{font-size:25px;margin:7px 0}
+  .section-grid{gap:10px;margin-top:10px}
+  .section,.detail-card,.action-panel,.catalogue-card{padding:13px}
+  .card{border-radius:15px;box-shadow:0 8px 24px rgba(28,34,31,.05)}
+  .section-head{margin-bottom:10px}
+  .toolbar{gap:8px}
+  .toolbar input,.toolbar select,.edit-form input,.edit-form select{width:100%;min-width:0;padding:10px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .table{font-size:11px}
+  .table th{padding:8px 7px;font-size:9px}
+  .table td{padding:9px 7px}
+  #view-patients .table th:nth-child(2),#view-patients .table td:nth-child(2),
+  #view-patients .table th:nth-child(3),#view-patients .table td:nth-child(3),
+  #view-patients .table th:nth-child(7),#view-patients .table td:nth-child(7){display:none}
+  #view-enquiries .table th:nth-child(2),#view-enquiries .table td:nth-child(2),
+  #view-enquiries .table th:nth-child(4),#view-enquiries .table td:nth-child(4),
+  #view-enquiries .table th:nth-child(7),#view-enquiries .table td:nth-child(7){display:none}
+  #view-appointments .table th:nth-child(4),#view-appointments .table td:nth-child(4),
+  #view-appointments .table th:nth-child(7),#view-appointments .table td:nth-child(7){display:none}
+  .detail-shell,.catalogue-grid,.info-grid,.edit-form{grid-template-columns:1fr}
+  .action-panel{position:static}
+  .appt{grid-template-columns:62px 1fr;gap:8px}
+  .appt>:last-child{grid-column:2}
+  .service-row{grid-template-columns:1fr auto}
+  .toast-wrap{left:10px;right:10px;bottom:calc(74px + env(safe-area-inset-bottom))}
+  .toast{width:100%}
+}
+@media(max-width:380px){
+  .content{padding-left:8px;padding-right:8px}
+  .nav button{font-size:9px}
+  .icon-btn{font-size:10px;padding-left:7px;padding-right:7px}
+}
