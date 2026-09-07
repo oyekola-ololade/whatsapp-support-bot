@@ -2,6 +2,10 @@
 
 Interactive sales demo for the three Bizi Systems dental Care packages.
 
+## Business enquiries
+
+The persistent Contact Us button opens a separate Bizi Systems enquiry form. Finishing the guided tour brings visitors to “Want this for your clinic?”, with form and direct chat options. Both routes use business WhatsApp +2347074396136. Form details are composed into a WhatsApp message; the visitor must tap Send in WhatsApp. The form does not save leads into the synthetic patient CRM or claim delivery. No patient or staff handlers are replaced by this feature. A small tooth mark accompanies the Bizi Systems heading.
+
 ## Live demo
 
 https://bizi-dentist-demo-production.up.railway.app/

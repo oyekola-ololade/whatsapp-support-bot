@@ -11,7 +11,7 @@ const CORE_KEY=String(process.env.BIZI_CORE_KEY||'');
 const RUN_SELF_TEST=String(process.env.RUN_DEMO_SELF_TEST||'false')==='true';
 if(!CORE||!CORE_KEY){console.error('BIZI_DEMO_CONFIG_MISSING');process.exit(1)}
 
-const files={'/':['index.html','text/html; charset=utf-8'],'/index.html':['index.html','text/html; charset=utf-8'],'/styles.css':['styles.css','text/css; charset=utf-8'],'/v2.css':['v2.css','text/css; charset=utf-8'],'/screenfit.css':['screenfit.css','text/css; charset=utf-8'],'/review-hotfix.css':['review-hotfix.css','text/css; charset=utf-8'],'/app.js':['app.js','text/javascript; charset=utf-8'],'/live.js':['live.js','text/javascript; charset=utf-8'],'/v2.js':['v2.js','text/javascript; charset=utf-8'],'/review-hotfix.js':['review-hotfix.js','text/javascript; charset=utf-8']};
+const files={'/conversion.js':['conversion.js','text/javascript; charset=utf-8'],'/conversion.css':['conversion.css','text/css; charset=utf-8'],'/':['index.html','text/html; charset=utf-8'],'/index.html':['index.html','text/html; charset=utf-8'],'/styles.css':['styles.css','text/css; charset=utf-8'],'/v2.css':['v2.css','text/css; charset=utf-8'],'/screenfit.css':['screenfit.css','text/css; charset=utf-8'],'/review-hotfix.css':['review-hotfix.css','text/css; charset=utf-8'],'/app.js':['app.js','text/javascript; charset=utf-8'],'/live.js':['live.js','text/javascript; charset=utf-8'],'/v2.js':['v2.js','text/javascript; charset=utf-8'],'/review-hotfix.js':['review-hotfix.js','text/javascript; charset=utf-8']};
 const security={'cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'no-referrer','permissions-policy':'camera=(), microphone=(), geolocation=(), payment=()','content-security-policy':"default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'"};
 const send=(res,status,body,type='application/json; charset=utf-8')=>{res.writeHead(status,{'content-type':type,...security});res.end(type.startsWith('application/json')?JSON.stringify(body):body)};
 async function readJson(req){let s='';for await(const c of req){s+=c;if(s.length>100000){const e=new Error('body_too_large');e.status=413;throw e}}try{return s?JSON.parse(s):{}}catch{const e=new Error('invalid_json');e.status=400;throw e}}
@@ -130,3 +130,4 @@ async function selfTest(){
   }catch(e){console.error('DEMO_FULL_REGRESSION_FAILED',e?.message||e)}
 }
 setTimeout(selfTest,2500);
+
