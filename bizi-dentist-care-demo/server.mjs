@@ -20,6 +20,10 @@ function demoIdentity(clientKey,salt=crypto.randomUUID()){const h=crypto.createH
 async function createPatientSession(config,salt){const clientKey=config?.client?.client_key,service=config?.services?.[0];if(!clientKey||!service?.slug)throw new Error('demo_config_incomplete');const id=demoIdentity(clientKey,salt),q=await core('bizi-core-data',{action:'quote_and_capture',client_key:clientKey,service_slug:service.slug,full_name:'Demo Patient',phone:id.phone,whatsapp_id:id.remote,session_id:id.sessionId,message:'Interactive clinic demo started',is_demo:true});if(!q.ok||q.data?.ok===false)throw new Error(q.data?.error||'demo_session_create_failed');return {demo_remote:id.remote,demo_session_id:id.sessionId,demo_enquiry_id:q.data.enquiry_id}}
 async function loadConfigWithSession(clientKey){const cfg=await core('bizi-demo-generator',{action:'config',client_key:clientKey});if(!cfg.ok||cfg.data?.ok===false)return cfg;const session=await createPatientSession(cfg.data,crypto.randomUUID());return {ok:true,status:200,data:{...cfg.data,...session}}}
 
+const demoInputState=new Map();
+const invalidDemoName=/^(?:admin|administrator|root|system|bot|assistant|receptionist|test|testing|null|undefined|anonymous|n\/?a|none)$/i;
+function invalidNameReply(enquiryId){return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'Please enter a real person name for the appointment.',choices:[],menu_choices:[],intent:'collect_name',validation_error:'invalid_name'}}}
+
 async function contextualServiceReply(clientKey,enquiryId,message,assistant){
   if(!enquiryId||assistant?.intent!=='browse'||/\bservices\b/i.test(message)||!/\b(service|price|cost|details|more about it)\b/i.test(message))return null;
   const d=await core('bizi-core-crm',{action:'enquiry_detail',client_key:clientKey,is_demo:true,enquiry_id:enquiryId});if(!d.ok||!d.data?.enquiry?.service?.slug)return null;
@@ -39,12 +43,14 @@ async function repairBooking(clientKey,enquiryId,message,assistant){
 
 async function handleChat(body){
   const clientKey=String(body?.client_key||''),sessionId=String(body?.session_id||''),enquiryId=String(body?.enquiry_id||''),staffId=String(body?.staff_id||''),message=String(body?.message||'').trim().slice(0,12000);if(!clientKey.startsWith('demo-')||!sessionId||!message)return {status:400,data:{ok:false,error:'demo_chat_fields_required'}};
-  if(/\b(human|person|staff|receptionist|talk to someone|speak to someone)\b/i.test(message)&&enquiryId&&staffId){const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:enquiryId,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)return a;return {status:200,data:{ok:true,enquiry_id:enquiryId,handoff:true,suppressed:false,reply:'Of course. I’ll hand this conversation to the clinic team now.',choices:[],menu_choices:[]}}}
+  if(demoInputState.get(sessionId)==='collect_name'&&invalidDemoName.test(message)){return invalidNameReply(enquiryId)}
+  if(/\b(human|person|staff|receptionist|talk to someone|speak to someone)\b/i.test(message)&&enquiryId&&staffId){demoInputState.delete(sessionId);const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:enquiryId,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)return a;return {status:200,data:{ok:true,enquiry_id:enquiryId,handoff:true,suppressed:false,reply:'Of course. I’ll hand this conversation to the clinic team now.',choices:[],menu_choices:[]}}}
   const r=await core('bizi-core-assistant',{action:'chat',client_key:clientKey,message,session_id:sessionId,is_demo:true,context:{}});if(!r.ok||r.data?.ok===false)return r;
   const effectiveEnquiry=r.data?.enquiry_id||enquiryId||null;
-  const repaired=await repairBooking(clientKey,effectiveEnquiry,message,r.data);if(repaired)return {status:200,data:repaired};
+  if(r.data?.intent==='collect_name')demoInputState.set(sessionId,'collect_name');else demoInputState.delete(sessionId);
+  const repaired=await repairBooking(clientKey,effectiveEnquiry,message,r.data);if(repaired){demoInputState.delete(sessionId);return {status:200,data:repaired}}
   const contextual=await contextualServiceReply(clientKey,effectiveEnquiry,message,r.data);if(contextual)return {status:200,data:contextual};
-  if(r.data?.handoff===true&&effectiveEnquiry&&staffId){const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:effectiveEnquiry,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)console.error('DEMO_HANDOFF_STATE_FAILED',a.status,a.data?.error||'unknown')}
+  if(r.data?.handoff===true&&effectiveEnquiry&&staffId){demoInputState.delete(sessionId);const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:effectiveEnquiry,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)console.error('DEMO_HANDOFF_STATE_FAILED',a.status,a.data?.error||'unknown')}
   return {status:r.status,data:{...r.data,enquiry_id:effectiveEnquiry}}
 }
 
@@ -66,7 +72,7 @@ async function api(req,res,u){
   return send(res,r.status,r.data)
 }
 
-const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:11,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true,full_regression:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
+const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:12,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true,full_regression:true,demo_input_validation:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
 server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT));
 
 async function selfTest(){
@@ -75,11 +81,18 @@ async function selfTest(){
     const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Regression Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'₦25,000',package_level:2});
     if(!created.ok||!created.data?.client_key)throw new Error(`create:${created.status}:${created.data?.error||'failed'}`);
     const k=created.data.client_key,cfg=await loadConfigWithSession(k),sid=cfg.data.demo_session_id,staff=cfg.data.staff?.id;let eid=cfg.data.demo_enquiry_id;
-    const sendStep=async(message)=>{const r=await handleChat({client_key:k,session_id:sid,enquiry_id:eid,staff_id:staff,message});if(!r.ok&&r.status>=400)throw new Error(`chat:${message}:${r.status}:${r.data?.error||'failed'}`);eid=r.data?.enquiry_id||eid;return r.data};
+    const sendStep=async(message)=>{const r=await handleChat({client_key:k,session_id:sid,enquiry_id:eid,staff_id:staff,message});if(r.status>=400)throw new Error(`chat:${message}:${r.status}:${r.data?.error||'failed'}`);eid=r.data?.enquiry_id||eid;return r.data};
 
     const first=await sendStep('Book an appointment');
+    const invalidName=await sendStep('administrator');
+    const nameBlocked=invalidName.validation_error==='invalid_name'&&invalidName.intent==='collect_name';
     const named=await sendStep('Regression Patient');
-    const phone=await sendStep('No, use 07040070706');
+    const askPhone=await sendStep('No');
+    const invalidPhone=await sendStep('123');
+    const phoneBlocked=invalidPhone.intent==='collect_phone'&&/phone/i.test(String(invalidPhone.reply||''));
+    const phone=await sendStep('07040070706');
+    const invalidEmail=await sendStep('not-an-email');
+    const emailBlocked=invalidEmail.intent==='collect_email'&&/email/i.test(String(invalidEmail.reply||''));
     const email=await sendStep('regression@example.com');
     const date=await sendStep('tomorrow');
     const timeChoice=(date.menu_choices||[]).find(x=>x.time)?.time;
@@ -96,7 +109,8 @@ async function selfTest(){
     console.log('DEMO_FULL_REGRESSION',JSON.stringify({
       created:true,
       client_key:k,
-      booking:{started:Boolean(first.reply),name_step:Boolean(named.reply),phone_change_step:Boolean(phone.reply),email_step:Boolean(email.reply),date_choices:(date.menu_choices||[]).length,time_choice:timeChoice,final_status:booked.booking_status||booked.intent,confirmed:booked.booking_status==='confirmed',crm_appointment:bookedInCrm},
+      validation:{name_blocked:nameBlocked,phone_blocked:phoneBlocked,email_blocked:emailBlocked},
+      booking:{started:Boolean(first.reply),name_step:Boolean(named.reply),phone_prompt:Boolean(askPhone.reply),phone_change_step:Boolean(phone.reply),email_step:Boolean(email.reply),date_choices:(date.menu_choices||[]).length,time_choice:timeChoice,final_status:booked.booking_status||booked.intent,confirmed:booked.booking_status==='confirmed',crm_appointment:bookedInCrm},
       service_context:{first_reply:String(s1.data?.reply||'').slice(0,120),detail_reply:String(s2.data?.reply||'').slice(0,180),kept:contextKept},
       crm_ok:appointments.ok&&appointments.data?.ok===true
     }));
