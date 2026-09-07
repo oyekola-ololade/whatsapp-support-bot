@@ -1,0 +1,76 @@
+/* Keep the sales decision and the live sandbox visible on real laptop viewports. */
+@media (min-width:540px){
+  .builder{padding:38px 22px 68px}
+  .builder-copy{margin:0 auto 30px}
+  .builder-copy h1{font-size:clamp(40px,4.2vw,62px);line-height:.98;max-width:900px}
+  .builder-copy>p{font-size:15px;line-height:1.55;margin-top:18px;max-width:720px}
+  .outcome-strip{margin-top:22px}
+  .care-picker{margin-top:16px}
+  .care-heading{margin-bottom:18px}
+  .care-heading h2{font-size:30px}
+  .care-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .care-card,.care-card:nth-child(3){grid-column:auto;min-height:450px;padding:17px}
+  .care-card h3{font-size:19px}
+  .care-card>p{font-size:9px;line-height:1.55}
+  .care-card-top{margin-bottom:14px}
+  .care-price{margin-top:15px}
+  .care-price strong{font-size:23px}
+  .care-card ul{padding-top:13px;margin:14px 0 18px;gap:7px}
+  .care-card li{font-size:8px}
+  .customise-block{grid-template-columns:.76fr 1.24fr;gap:32px;padding:32px;margin-top:44px}
+  .customise-copy h2{font-size:34px}
+
+  .clinic-header{height:64px;padding:0 16px;grid-template-columns:minmax(150px,1fr) auto auto;gap:10px}
+  .experience-tabs{order:initial;grid-column:auto;margin:0;justify-self:center}
+  .experience-tabs button{height:34px;padding:0 9px;font-size:8px}
+  .clinic-id strong{max-width:180px}
+  .try-another{font-size:7px;padding:0 8px}
+  .demo-guide{margin-top:8px;padding:9px 11px;width:calc(100% - 24px)}
+  .demo-guide p{max-width:680px}
+  .experience-shell{width:calc(100% - 24px);padding:9px 0 24px}
+  #demoGuide:not(.dismissed)+.experience-shell [data-panel="patient"] .view-intro{display:none}
+  #demoGuide.dismissed+.experience-shell [data-panel="patient"] .view-intro{display:flex;margin-bottom:8px}
+  #demoGuide.dismissed+.experience-shell [data-panel="patient"] .view-intro h2{font-size:23px;margin:3px 0 4px}
+  #demoGuide.dismissed+.experience-shell [data-panel="patient"] .view-intro p{font-size:8px}
+  .patient-grid{display:grid;grid-template-columns:minmax(330px,1fr) minmax(190px,250px);gap:10px;align-items:stretch}
+  .phone{height:clamp(410px,calc(100dvh - 165px),650px);min-height:410px;border-radius:18px}
+  .phone-head{height:54px;flex:0 0 54px}
+  .sandbox{padding:5px;flex:0 0 auto}
+  .thread{min-height:0;max-height:none;flex:1;overflow:auto;padding:13px}
+  .quick-replies{flex:0 0 auto;padding:5px 9px;max-height:74px;overflow:auto}
+  .composer{flex:0 0 auto;padding:7px 9px 9px}
+  .composer input{height:36px}.composer button{width:36px;height:36px}
+  .patient-side{display:grid;grid-template-columns:1fr;align-content:start;gap:8px;margin:0}
+  .story-card,.state-card{padding:11px;border-radius:13px}
+  .story-card strong{font-size:11px}.story-card p{font-size:7px}
+  .state-head{padding-bottom:8px}.state-row{padding:6px 0;font-size:7px}
+  .staff-jump{height:38px;font-size:8px;grid-column:auto}
+  #resetPatient{height:36px!important;margin-top:0!important}
+  .compact-intro{margin-bottom:8px}
+  .compact-intro h2{font-size:25px;margin:4px 0}.compact-intro p{font-size:9px}
+}
+
+@media (min-width:540px) and (max-width:760px){
+  .builder-copy h1{font-size:39px}
+  .care-card{padding:13px;min-height:430px}
+  .care-card h3{font-size:16px}.care-price strong{font-size:20px}
+  .recommended{position:static;width:max-content;margin:-2px 0 8px auto}
+  .clinic-header{grid-template-columns:minmax(120px,1fr) auto auto;padding:0 8px;gap:4px}
+  .clinic-logo{width:32px;height:32px}.clinic-id{gap:6px}.clinic-id strong{font-size:9px;max-width:125px}.clinic-id small{font-size:6px;max-width:125px}
+  .experience-tabs{gap:2px}.experience-tabs button{padding:0 6px;font-size:7px}.try-another{max-width:76px;line-height:1.15}
+  .demo-guide{font-size:90%}
+  .patient-grid{grid-template-columns:minmax(300px,1fr) 180px}
+}
+
+@media (max-width:539px){
+  .builder{padding-top:28px}
+  .builder-copy{margin-bottom:30px}.builder-copy h1{font-size:36px}.builder-copy>p{font-size:13px;line-height:1.55}
+  .care-card{min-height:0}
+  .customise-block{margin-top:34px}
+  .demo-guide{position:relative;width:calc(100% - 16px);margin-top:6px;padding:9px}
+  .demo-guide>div:first-child{gap:8px}.demo-guide>div:first-child>span{min-width:39px}
+  #demoGuide:not(.dismissed)+.experience-shell [data-panel="patient"] .view-intro{display:none}
+  .experience-shell{padding-top:8px}
+  .phone{height:calc(100dvh - 190px);min-height:430px}
+  .thread{min-height:0!important;max-height:none!important;overflow:auto}
+}
