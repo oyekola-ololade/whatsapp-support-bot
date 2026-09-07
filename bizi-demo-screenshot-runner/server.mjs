@@ -161,4 +161,11 @@ const server = http.createServer(async (req,res)=>{
     res.end(`<h1>Bizi demo screenshot runner</h1><p><a href="/capture">Run capture</a></p><p><a href="/manifest">Manifest</a></p>`);
   } catch (e) { json(res,500,{ok:false,error:String(e?.message||e)}); }
 });
-server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_SCREENSHOT_RUNNER_READY',PORT));
+server.listen(PORT,'0.0.0.0',()=>{
+  console.log('BIZI_SCREENSHOT_RUNNER_READY',PORT);
+  setTimeout(async()=>{
+    const out=await captureAll();
+    if(out.ok) console.log(`BIZI_AUTO_CAPTURE_COMPLETE|${out.lastRun}|${out.assets.length}`);
+    else console.error(`BIZI_AUTO_CAPTURE_FAILED|${String(out.error||'unknown')}`);
+  },1500);
+});
