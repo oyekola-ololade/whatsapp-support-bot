@@ -5,6 +5,10 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const PORT=Number(process.env.PORT||3000);
+const CORE=String(process.env.BIZI_CORE_URL||'').replace(/\/$/,'');
+const CORE_KEY=String(process.env.BIZI_CORE_KEY||'');
+if(!CORE||!CORE_KEY){console.error('BIZI_DEMO_CONFIG_MISSING');process.exit(1)}
+
 const files={
   '/':['index.html','text/html; charset=utf-8'],
   '/index.html':['index.html','text/html; charset=utf-8'],
@@ -19,29 +23,37 @@ const security={
   'permissions-policy':'camera=(), microphone=(), geolocation=(), payment=()',
   'content-security-policy':"default-src 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'"
 };
-
-function send(res,status,body,type='application/json; charset=utf-8'){
-  res.writeHead(status,{'content-type':type,...security});
-  res.end(body);
+const send=(res,status,body,type='application/json; charset=utf-8')=>{res.writeHead(status,{'content-type':type,...security});res.end(type.startsWith('application/json')?JSON.stringify(body):body)};
+async function readJson(req){let s='';for await(const c of req){s+=c;if(s.length>100000){const e=new Error('body_too_large');e.status=413;throw e}}try{return s?JSON.parse(s):{}}catch{const e=new Error('invalid_json');e.status=400;throw e}}
+async function core(fn,body){const r=await fetch(`${CORE}/${fn}`,{method:'POST',headers:{'content-type':'application/json','x-bizi-core-key':CORE_KEY},body:JSON.stringify(body),signal:AbortSignal.timeout(20000)});const text=await r.text();let data;try{data=text?JSON.parse(text):{}}catch{data={ok:false,error:'invalid_core_response'}}return {status:r.status,ok:r.ok,data}}
+async function api(req,res,u){
+  const b=await readJson(req);
+  let r;
+  if(u.pathname==='/api/create')r=await core('bizi-demo-generator',{action:'create_demo',...b});
+  else if(u.pathname==='/api/config')r=await core('bizi-demo-generator',{action:'config',client_key:b.client_key});
+  else if(u.pathname==='/api/chat')r=await core('bizi-core-whatsapp',{action:'process_inbound',client_key:b.client_key,channel_id:b.channel_id,remote_jid:b.remote_jid,message:b.message,message_id:b.message_id,push_name:'Demo Patient',is_demo:true});
+  else if(u.pathname==='/api/enquiries')r=await core('bizi-core-crm',{action:'list_enquiries',client_key:b.client_key,is_demo:true,limit:80});
+  else if(u.pathname==='/api/detail')r=await core('bizi-core-crm',{action:'enquiry_detail',client_key:b.client_key,is_demo:true,enquiry_id:b.enquiry_id});
+  else if(u.pathname==='/api/action')r=await core('bizi-core-crm',{action:'staff_action',client_key:b.client_key,is_demo:true,enquiry_id:b.enquiry_id,action_type:b.action_type,staff_id:b.staff_id,follow_up_due_at:b.follow_up_due_at,note:b.note});
+  else if(u.pathname==='/api/catalogue')r=await core('bizi-core-data',{action:'catalogue',client_key:b.client_key,is_demo:true});
+  else if(u.pathname==='/api/website')r=await core('bizi-demo-generator',{action:'website_enquiry',client_key:b.client_key,full_name:b.full_name,email:b.email,message:b.message,service_slug:b.service_slug});
+  else if(u.pathname==='/api/request')r=await core('bizi-demo-generator',{action:'appointment_request',client_key:b.client_key,full_name:b.full_name,email:b.email,phone:b.phone,preferred_date:b.preferred_date,preferred_time:b.preferred_time,service_slug:b.service_slug});
+  else return send(res,404,{ok:false,error:'not_found'});
+  return send(res,r.status,r.data);
 }
 
 const server=http.createServer(async(req,res)=>{
   try{
     const u=new URL(req.url||'/','http://localhost');
-    if(req.method==='GET'&&u.pathname==='/health'){
-      return send(res,200,JSON.stringify({ok:true,service:'bizi-dentist-care-demo',version:1,packages:3}));
+    if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:2,core_backed:true});
+    if(u.pathname.startsWith('/api/')){
+      if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});
+      return api(req,res,u);
     }
-    if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,JSON.stringify({ok:false,error:'method_not_allowed'}));
-    const entry=files[u.pathname];
-    if(!entry)return send(res,404,JSON.stringify({ok:false,error:'not_found'}));
-    const [name,type]=entry;
-    const body=await fs.readFile(path.join(__dirname,name));
-    res.writeHead(200,{'content-type':type,...security});
-    if(req.method==='HEAD')return res.end();
-    res.end(body);
-  }catch(e){
-    console.error('CARE_DEMO_SERVER_ERROR',e?.message||e);
-    send(res,500,JSON.stringify({ok:false,error:'internal_error'}));
-  }
+    if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});
+    const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});
+    const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));
+    res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body);
+  }catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}
 });
-server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_CARE_DEMO_READY',PORT));
+server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT));
