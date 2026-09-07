@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs & PID=$!; sleep 3; curl -s http://127.0.0.1:${PORT:-3000}/capture; node export-assets.mjs; wait $PID"
   },
   "dependencies": {
     "playwright": "1.55.0"
