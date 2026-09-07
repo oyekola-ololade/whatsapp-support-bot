@@ -3,191 +3,119 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#071411">
-  <meta name="description" content="Build a personalised Bizi Dentist Care demo for your clinic.">
-  <title>Bizi Dentist Care — Build Your Demo</title>
+  <meta name="theme-color" content="#0b1713">
+  <meta name="description" content="Create a personalised live dental clinic operations demo.">
+  <title>Your Clinic Demo</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="bizi-brand" href="#" data-reset-home>
-      <span class="tooth-mark" aria-hidden="true">B</span>
-      <span><strong>Bizi Dentist Care</strong><small>by Bizi Systems</small></span>
-    </a>
-    <div class="topbar-right">
-      <span class="truth-chip">Synthetic demo data</span>
-      <button class="text-btn hidden" id="editDemoBtn">Edit demo</button>
-    </div>
-  </header>
-
   <main>
-    <section class="builder-screen" id="builderScreen">
-      <div class="builder-shell">
+    <section id="builder" class="builder">
+      <div class="builder-wrap">
         <div class="builder-copy">
-          <div class="eyebrow">Build it around your clinic</div>
-          <h1>Don’t imagine the system.<br><span>See your clinic inside it.</span></h1>
-          <p>Choose a Care level, add a few clinic details, and Bizi will generate a branded patient experience and staff workspace you can actually click through.</p>
-          <div class="builder-proof">
-            <div><b>01</b><span><strong>Brand it</strong><small>Your clinic name, location and colour.</small></span></div>
-            <div><b>02</b><span><strong>Experience it</strong><small>Use the patient chat sandbox and staff view.</small></span></div>
-            <div><b>03</b><span><strong>Upgrade it</strong><small>See exactly what each Care level adds.</small></span></div>
+          <div class="tiny-brand">BIZI SYSTEMS · DENTAL</div>
+          <h1>See what your front desk could feel like when the repetitive work disappears.</h1>
+          <p>This is not a feature tour. Put in your clinic details and step into a working demo branded like it already belongs to you.</p>
+          <div class="outcome-strip">
+            <span>Faster patient replies</span><i></i><span>Fewer missed enquiries</span><i></i><span>Clearer staff handoff</span>
           </div>
         </div>
 
-        <form class="builder-card" id="demoBuilder">
-          <div class="form-head">
-            <div><small>PERSONALISED PREVIEW</small><h2>Build my clinic demo</h2></div>
-            <span>≈ 30 sec</span>
+        <form id="builderForm" class="builder-card">
+          <div class="card-head"><div><small>BUILD YOUR CLINIC DEMO</small><h2>Make it yours</h2></div><span>about 30 seconds</span></div>
+          <label><span>Clinic name</span><input id="clinicName" maxlength="60" placeholder="Pearl Dental Clinic" required></label>
+          <div class="two-col">
+            <label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label>
+            <label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#26705b"><b id="colorText">#26705B</b></div></label>
+          </div>
+          <div class="two-col">
+            <label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label>
+            <label><span>Example price</span><input id="servicePrice" maxlength="32" value="₦25,000"></label>
           </div>
 
-          <div class="field-grid two">
-            <label class="field"><span>Clinic name</span><input id="clinicName" maxlength="55" placeholder="e.g. Pearl Dental Clinic" required></label>
-            <label class="field"><span>Location</span><input id="clinicLocation" maxlength="45" placeholder="e.g. Lekki, Lagos" required></label>
-          </div>
-
-          <div class="field-grid two">
-            <label class="field"><span>Featured service</span><input id="serviceName" maxlength="45" value="Teeth Cleaning" required></label>
-            <label class="field"><span>Example price</span><input id="servicePrice" maxlength="25" value="₦25,000" required></label>
-          </div>
-
-          <div class="field">
-            <span>Brand colour</span>
-            <div class="colour-picker">
-              <input type="color" id="brandColor" value="#277a61" aria-label="Brand colour">
-              <button type="button" class="swatch active" style="--swatch:#277a61" data-colour="#277a61" aria-label="Green"></button>
-              <button type="button" class="swatch" style="--swatch:#245f9d" data-colour="#245f9d" aria-label="Blue"></button>
-              <button type="button" class="swatch" style="--swatch:#7448a8" data-colour="#7448a8" aria-label="Purple"></button>
-              <button type="button" class="swatch" style="--swatch:#9b5b36" data-colour="#9b5b36" aria-label="Brown"></button>
-              <span id="colourValue">#277A61</span>
-            </div>
-          </div>
-
-          <fieldset class="package-picker">
-            <legend>Choose the Care level to experience</legend>
-            <label class="care-option">
-              <input type="radio" name="care" value="1">
-              <span class="care-number">01</span>
-              <span class="care-copy"><strong>Care 1 · Essential</strong><small>Patient Assistant + simple enquiry table</small></span>
-              <span class="care-price">≈ ₦160k</span>
+          <fieldset class="levels">
+            <legend>Which outcome do you want to experience?</legend>
+            <label class="level-option">
+              <input type="radio" name="level" value="1">
+              <span class="level-num">01</span>
+              <span><strong>Stop repeating the same answers</strong><small>Patients get fast replies and useful enquiries land in a simple staff table.</small></span>
             </label>
-            <label class="care-option selected">
-              <input type="radio" name="care" value="2" checked>
-              <span class="care-number">02</span>
-              <span class="care-copy"><strong>Care 2 · Operations</strong><small>Patient Assistant + branded CRM + booking + follow-up</small></span>
-              <span class="care-price">≈ ₦300k</span>
-              <em>Recommended</em>
+            <label class="level-option selected">
+              <input type="radio" name="level" value="2" checked>
+              <span class="level-num">02</span>
+              <span><strong>Stop losing track of patient conversations</strong><small>Enquiries, booking state, follow-up and human takeover stay in one branded workspace.</small></span>
+              <em>Most useful for growing clinics</em>
             </label>
-            <label class="care-option">
-              <input type="radio" name="care" value="3">
-              <span class="care-number">03</span>
-              <span class="care-copy"><strong>Care 3 · Custom</strong><small>Custom clinic operations platform + broader integrations</small></span>
-              <span class="care-price">Custom</span>
+            <label class="level-option">
+              <input type="radio" name="level" value="3">
+              <span class="level-num">03</span>
+              <span><strong>Run patient intake through one clinic system</strong><small>Your website and other approved channels can feed the same custom operations flow.</small></span>
             </label>
           </fieldset>
 
-          <button class="generate-btn" type="submit"><span>Generate my live demo</span><b>→</b></button>
-          <p class="form-note">This creates a private browser demo using synthetic patients. No real clinic or patient data is submitted.</p>
+          <button id="buildBtn" class="build-btn" type="submit"><span>Show me my clinic</span><b>→</b></button>
+          <p class="safe-note">Synthetic demo only. Do not enter real patient information.</p>
         </form>
       </div>
     </section>
 
-    <section class="demo-screen hidden" id="demoScreen">
-      <div class="demo-banner">
-        <div class="demo-ident">
-          <span class="clinic-logo" id="clinicLogo">P</span>
-          <div><strong id="demoClinicName">Pearl Dental Clinic</strong><small id="demoClinicLocation">Lekki, Lagos</small></div>
+    <section id="experience" class="experience hidden">
+      <header class="clinic-header">
+        <div class="clinic-id"><span id="clinicLogo" class="clinic-logo">PD</span><div><strong id="clinicTitle">Pearl Dental Clinic</strong><small id="clinicSub">Lekki, Lagos · personalised demo</small></div></div>
+        <div class="experience-tabs">
+          <button class="active" data-view="patient">Patient experience</button>
+          <button data-view="staff">What staff sees</button>
+          <button data-view="website" id="websiteTab">Website experience</button>
         </div>
-        <div class="care-switcher" role="tablist" aria-label="Care level">
-          <button data-care-switch="1"><span>01</span> Essential</button>
-          <button data-care-switch="2" class="active"><span>02</span> Operations</button>
-          <button data-care-switch="3"><span>03</span> Custom</button>
-        </div>
-        <div class="demo-state"><i></i><span id="demoStateText">Personalised demo</span></div>
-      </div>
+        <button id="tryAnother" class="try-another">Try another level</button>
+      </header>
 
-      <div class="demo-layout">
-        <aside class="app-nav">
-          <div class="nav-product"><span class="mini-logo" id="navLogo">P</span><div><strong id="navClinicName">Pearl Dental</strong><small id="navCareLabel">Care 2</small></div></div>
-          <nav>
-            <button class="nav-item active" data-view="patient"><span>◉</span>Patient sandbox</button>
-            <button class="nav-item" data-view="crm"><span>▦</span><span id="crmNavLabel">Enquiry CRM</span></button>
-            <button class="nav-item" data-view="website" id="websiteNav"><span>⌂</span>Branded website <b>Care 3</b></button>
-            <button class="nav-item" data-view="channels" id="channelsNav"><span>↗</span>Channels <b>Care 3</b></button>
-          </nav>
-          <div class="nav-footer">
-            <span>Powered by</span><strong>Bizi Systems</strong>
+      <div class="experience-shell">
+        <section class="view active" data-panel="patient">
+          <div class="view-intro">
+            <div><small id="patientOutcomeLabel">PATIENT EXPERIENCE</small><h2 id="patientOutcomeTitle">A patient gets an answer without waiting for the front desk.</h2><p id="patientOutcomeCopy">Use the chat exactly like a patient would. Ask about pricing, appointments, or something that should be handed to staff.</p></div>
+            <span id="liveBadge" class="live-badge"><i></i> Live demo tenant</span>
           </div>
-        </aside>
 
-        <div class="app-main">
-          <section class="app-view active" data-view-panel="patient">
-            <div class="view-header">
-              <div><div class="eyebrow">PATIENT EXPERIENCE</div><h2>Try the assistant yourself.</h2><p id="patientSubhead">Ask about services, pricing, booking, or something that requires staff.</p></div>
-              <div class="feature-chip" id="patientFeatureChip">Care 2 · booking-aware</div>
+          <div class="patient-grid">
+            <div class="phone">
+              <div class="phone-head"><span id="phoneLogo">PD</span><div><strong id="phoneClinic">Pearl Dental Clinic</strong><small>online</small></div></div>
+              <div class="sandbox">Sandbox · mirrors the patient conversation</div>
+              <div id="thread" class="thread"></div>
+              <div id="quickReplies" class="quick-replies"></div>
+              <form id="chatForm" class="composer"><input id="chatInput" maxlength="700" autocomplete="off" placeholder="Message the clinic"><button aria-label="Send">➤</button></form>
             </div>
 
-            <div class="patient-demo-grid">
-              <div class="phone-shell">
-                <div class="phone-top">
-                  <span class="phone-avatar" id="phoneAvatar">P</span>
-                  <div><strong id="phoneClinicName">Pearl Dental Clinic</strong><small><i></i> online</small></div>
-                  <b>⋮</b>
-                </div>
-                <div class="sandbox-note">Interactive sandbox · synthetic data</div>
-                <div class="phone-thread" id="phoneThread" aria-live="polite"></div>
-                <div class="quick-replies" id="quickReplies"></div>
-                <form class="phone-composer" id="chatForm">
-                  <input id="chatInput" autocomplete="off" maxlength="500" placeholder="Message the clinic…">
-                  <button type="submit" aria-label="Send">➤</button>
-                </form>
-              </div>
+            <aside class="patient-side">
+              <div class="story-card"><small>WHAT CHANGED FOR THE CLINIC?</small><strong id="storyTitle">The enquiry is no longer stuck in one chat.</strong><p id="storyCopy">As the patient talks, the system turns useful information into staff-visible work.</p></div>
+              <div class="state-card"><div class="state-head"><strong>Demo state</strong><span id="automationState">Assistant active</span></div><div id="stateRows"></div></div>
+              <button id="openStaff" class="staff-jump">See what your team sees →</button>
+            </aside>
+          </div>
+        </section>
 
-              <div class="live-context">
-                <div class="context-head"><div><small>LIVE DEMO STATE</small><strong id="contextPatient">Demo Patient</strong></div><span id="automationState">Assistant active</span></div>
-                <div class="state-list" id="patientStateList"></div>
-                <div class="experience-card" id="experienceCard"></div>
-                <button class="secondary-btn" id="resetChatBtn">Reset patient sandbox</button>
-              </div>
-            </div>
-          </section>
+        <section class="view" data-panel="staff">
+          <div class="view-intro">
+            <div><small>STAFF EXPERIENCE</small><h2 id="staffTitle">Everything useful from the conversation is already organised.</h2><p id="staffCopy">No one needs to search through WhatsApp history to figure out what the patient wanted or what should happen next.</p></div>
+            <button id="refreshStaff" class="refresh-btn">Refresh demo data</button>
+          </div>
+          <div id="staffSurface"></div>
+        </section>
 
-          <section class="app-view" data-view-panel="crm">
-            <div class="view-header">
-              <div><div class="eyebrow" id="crmEyebrow">STAFF EXPERIENCE</div><h2 id="crmTitle">Enquiry CRM</h2><p id="crmDescription">See how patient conversations become staff-manageable work.</p></div>
-              <div class="feature-chip" id="crmFeatureChip">Care 2</div>
-            </div>
-            <div id="crmSurface"></div>
-          </section>
-
-          <section class="app-view" data-view-panel="website">
-            <div class="view-header">
-              <div><div class="eyebrow">CARE 3 · CUSTOM PREVIEW</div><h2>Your branded patient website.</h2><p>A custom implementation can connect web enquiries to the same patient operations layer.</p></div>
-              <div class="feature-chip">Website → CRM</div>
-            </div>
-            <div class="website-frame" id="websiteFrame"></div>
-          </section>
-
-          <section class="app-view" data-view-panel="channels">
-            <div class="view-header">
-              <div><div class="eyebrow">CARE 3 · EXTENSIBLE CHANNELS</div><h2>One patient workflow, more entry points.</h2><p>Custom implementations can connect approved channels into the same clinic operations flow.</p></div>
-              <div class="feature-chip">Custom scope</div>
-            </div>
-            <div class="channels-grid" id="channelsGrid"></div>
-            <div class="integration-note"><strong>Important:</strong> these tiles show integration capability, not accounts connected in this demo. A real implementation is configured against the clinic’s actual approved accounts and permissions.</div>
-          </section>
-        </div>
+        <section class="view" data-panel="website">
+          <div class="view-intro">
+            <div><small>CUSTOM EXPERIENCE</small><h2>See a website enquiry become staff work without being copied by hand.</h2><p>This is the Care 3 preview: a branded clinic website, web enquiry form and patient assistant feeding the same operations layer.</p></div>
+            <span class="custom-note">Custom scope · real integrations require clinic account access</span>
+          </div>
+          <div id="websiteExperience" class="website-experience"></div>
+        </section>
       </div>
 
-      <div class="mobile-demo-nav">
-        <button class="active" data-view="patient">Chat</button>
-        <button data-view="crm">CRM</button>
-        <button data-view="website" id="mobileWebsite">Website</button>
-        <button data-view="channels" id="mobileChannels">Channels</button>
-      </div>
+      <footer class="demo-footer"><span>Powered by Bizi Systems</span><span id="levelFooter">Care Level 2 demo</span><span>Synthetic patients only</span></footer>
     </section>
   </main>
 
-  <div class="toast" id="toast" role="status"></div>
+  <div id="toast" class="toast" role="status"></div>
   <script src="/app.js" defer></script>
 </body>
 </html>
