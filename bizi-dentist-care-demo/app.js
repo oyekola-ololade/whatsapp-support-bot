@@ -38,3 +38,47 @@ renderWebsite=function(){
   $('#bookSite').onclick=()=>sendSiteMessage('Book an appointment');
   $('#siteChatForm').onsubmit=e=>{e.preventDefault();sendSiteMessage($('#siteChatInput').value)};
 };
+
+/* Review-flow patches: keep package selection and personalisation as separate screens. */
+document.addEventListener('DOMContentLoaded',()=>{
+  const careCopy={
+    1:'Care 1 · Approved answers, structured enquiries and appointment requests for staff to confirm.',
+    2:'Care 2 · Patient conversations become organised booking, follow-up and human-handoff work.',
+    3:'Care 3 · Website, chat and approved channels can feed one custom clinic operations layer.'
+  };
+  const careFrom=v=>Math.max(1,Math.min(3,Number(v)||2));
+  const goToPersonalise=care=>location.assign(`${location.pathname}?step=2&care=${careFrom(care)}`);
+
+  const applyPersonaliseRoute=()=>{
+    const p=new URLSearchParams(location.search),builder=document.querySelector('#builder');if(!builder)return;
+    if(p.get('step')!=='2'){builder.classList.remove('personalise-mode');return}
+    const care=careFrom(p.get('care'));builder.classList.add('personalise-mode');
+    document.querySelectorAll('input[name="level"]').forEach(r=>r.checked=Number(r.value)===care);
+    document.querySelectorAll('[data-care-card]').forEach(c=>c.classList.toggle('selected',Number(c.dataset.careCard)===care));
+    const badge=document.querySelector('#selectedCareBadge'),out=document.querySelector('#selectedOutcome strong'),btn=document.querySelector('#buildBtn span');
+    if(badge)badge.textContent=`Care ${care} selected`;if(out)out.textContent=careCopy[care];if(btn)btn.textContent=`Build my Care ${care} demo`;
+    const copy=document.querySelector('.customise-copy');
+    if(copy&&!document.querySelector('#stepBack')){const back=document.createElement('button');back.id='stepBack';back.type='button';back.className='step-back';back.textContent='← Back to Care levels';back.onclick=()=>location.assign(location.pathname);copy.prepend(back)}
+    setTimeout(()=>document.querySelector('#customise')?.scrollIntoView({block:'center'}),30);
+  };
+
+  document.addEventListener('click',e=>{
+    if(new URLSearchParams(location.search).has('demo'))return;
+    const pick=e.target.closest?.('[data-pick-level]'),card=e.target.closest?.('[data-care-card]');if(!pick&&!card)return;
+    const care=pick?.dataset.pickLevel||card?.dataset.careCard;if(!care)return;
+    e.preventDefault();e.stopImmediatePropagation();goToPersonalise(care);
+  },true);
+  document.addEventListener('keydown',e=>{
+    if(!['Enter',' '].includes(e.key)||new URLSearchParams(location.search).has('demo'))return;
+    const card=e.target.closest?.('[data-care-card]');if(!card)return;e.preventDefault();e.stopImmediatePropagation();goToPersonalise(card.dataset.careCard);
+  },true);
+
+  document.querySelector('#tryAnother')?.addEventListener('click',()=>{document.querySelector('#builder')?.classList.remove('personalise-mode');history.replaceState(null,'',location.pathname)});
+
+  const fixStaffMessageRoles=root=>{
+    (root||document).querySelectorAll?.('.staff-chat-msg.user').forEach(row=>{row.classList.add('patient');const label=row.querySelector('b');if(label)label.textContent='Patient'});
+  };
+  const staffSurface=document.querySelector('#staffSurface');if(staffSurface){fixStaffMessageRoles(staffSurface);new MutationObserver(()=>fixStaffMessageRoles(staffSurface)).observe(staffSurface,{childList:true,subtree:true})}
+
+  applyPersonaliseRoute();
+});
