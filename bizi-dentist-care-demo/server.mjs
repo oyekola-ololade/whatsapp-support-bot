@@ -7,6 +7,7 @@ const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const PORT=Number(process.env.PORT||3000);
 const CORE=String(process.env.BIZI_CORE_URL||'').replace(/\/$/,'');
 const CORE_KEY=String(process.env.BIZI_CORE_KEY||'');
+const RUN_SELF_TEST=String(process.env.RUN_DEMO_SELF_TEST||'false')==='true';
 if(!CORE||!CORE_KEY){console.error('BIZI_DEMO_CONFIG_MISSING');process.exit(1)}
 
 const files={
@@ -45,7 +46,7 @@ async function api(req,res,u){
 const server=http.createServer(async(req,res)=>{
   try{
     const u=new URL(req.url||'/','http://localhost');
-    if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:2,core_backed:true});
+    if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:3,core_backed:true});
     if(u.pathname.startsWith('/api/')){
       if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});
       return api(req,res,u);
@@ -57,3 +58,16 @@ const server=http.createServer(async(req,res)=>{
   }catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}
 });
 server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT));
+
+async function selfTest(){
+  if(!RUN_SELF_TEST)return;
+  try{
+    const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Outcome Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'₦25,000',package_level:2});
+    if(!created.ok||!created.data?.client_key)throw new Error(`create:${created.status}:${created.data?.error||'failed'}`);
+    const k=created.data.client_key,ch=created.data.channel_id;
+    const chat=await core('bizi-core-whatsapp',{action:'process_inbound',client_key:k,channel_id:ch,remote_jid:'2348000009191@s.whatsapp.net',message:'How much is Dental Cleaning?',message_id:`demo-selftest-${Date.now()}`,push_name:'Demo Patient',is_demo:true});
+    const crm=await core('bizi-core-crm',{action:'list_enquiries',client_key:k,is_demo:true,limit:20});
+    console.log('DEMO_SELF_TEST',JSON.stringify({created:created.ok,chat:chat.ok&&chat.data?.ok===true,reply:Boolean(chat.data?.reply),crm:crm.ok&&Array.isArray(crm.data?.enquiries),enquiries:crm.data?.enquiries?.length||0,client_key:k}));
+  }catch(e){console.error('DEMO_SELF_TEST_FAILED',e?.message||e)}
+}
+setTimeout(selfTest,2500);
