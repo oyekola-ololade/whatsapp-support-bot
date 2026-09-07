@@ -1,0 +1,1 @@
+Launch verification runner refresh. This file exists only to force Railway to rebuild the screenshot runner from the current main branch after the automatic capture startup fix.
