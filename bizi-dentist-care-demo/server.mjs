@@ -66,8 +66,40 @@ async function api(req,res,u){
   return send(res,r.status,r.data)
 }
 
-const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:10,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
+const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:11,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true,full_regression:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
 server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT));
 
-async function selfTest(){if(!RUN_SELF_TEST)return;try{const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Outcome Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'₦25,000',package_level:2});if(!created.ok||!created.data?.client_key)throw new Error(`create:${created.status}:${created.data?.error||'failed'}`);const cfg=await loadConfigWithSession(created.data.client_key),chat=await handleChat({client_key:created.data.client_key,session_id:cfg.data.demo_session_id,enquiry_id:cfg.data.demo_enquiry_id,staff_id:cfg.data.staff?.id,message:'How much is Dental Cleaning?'}),crm=await core('bizi-core-crm',{action:'list_enquiries',client_key:created.data.client_key,is_demo:true,limit:20});console.log('DEMO_SELF_TEST',JSON.stringify({created:true,session:Boolean(cfg.data.demo_session_id),chat_status:chat.status,chat_ok:chat.data?.ok===true,reply:Boolean(chat.data?.reply),crm_ok:crm.ok&&crm.data?.ok===true,enquiries:crm.data?.enquiries?.length||0,client_key:created.data.client_key}))}catch(e){console.error('DEMO_SELF_TEST_FAILED',e?.message||e)}}
+async function selfTest(){
+  if(!RUN_SELF_TEST)return;
+  try{
+    const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Regression Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'₦25,000',package_level:2});
+    if(!created.ok||!created.data?.client_key)throw new Error(`create:${created.status}:${created.data?.error||'failed'}`);
+    const k=created.data.client_key,cfg=await loadConfigWithSession(k),sid=cfg.data.demo_session_id,staff=cfg.data.staff?.id;let eid=cfg.data.demo_enquiry_id;
+    const sendStep=async(message)=>{const r=await handleChat({client_key:k,session_id:sid,enquiry_id:eid,staff_id:staff,message});if(!r.ok&&r.status>=400)throw new Error(`chat:${message}:${r.status}:${r.data?.error||'failed'}`);eid=r.data?.enquiry_id||eid;return r.data};
+
+    const first=await sendStep('Book an appointment');
+    const named=await sendStep('Regression Patient');
+    const phone=await sendStep('No, use 07040070706');
+    const email=await sendStep('regression@example.com');
+    const date=await sendStep('tomorrow');
+    const timeChoice=(date.menu_choices||[]).find(x=>x.time)?.time;
+    if(!timeChoice)throw new Error(`booking:no_available_time:${date.reply||''}`);
+    const booked=await sendStep(`I choose ${String(timeChoice).slice(0,5)}`);
+    const appointments=await core('bizi-core-crm',{action:'list_appointments',client_key:k,is_demo:true,limit:30});
+    const bookedInCrm=(appointments.data?.appointments||[]).some(x=>x.enquiry_id===eid||String(x.start_time||'').startsWith(String(timeChoice).slice(0,5)));
+
+    const cfg2=await loadConfigWithSession(k),sid2=cfg2.data.demo_session_id;let eid2=cfg2.data.demo_enquiry_id;
+    const s1=await handleChat({client_key:k,session_id:sid2,enquiry_id:eid2,staff_id:staff,message:'Dental Consultation'});eid2=s1.data?.enquiry_id||eid2;
+    const s2=await handleChat({client_key:k,session_id:sid2,enquiry_id:eid2,staff_id:staff,message:'service and price'});
+    const contextKept=/Dental Consultation/i.test(String(s2.data?.reply||''))&&!/current services/i.test(String(s2.data?.reply||''));
+
+    console.log('DEMO_FULL_REGRESSION',JSON.stringify({
+      created:true,
+      client_key:k,
+      booking:{started:Boolean(first.reply),name_step:Boolean(named.reply),phone_change_step:Boolean(phone.reply),email_step:Boolean(email.reply),date_choices:(date.menu_choices||[]).length,time_choice:timeChoice,final_status:booked.booking_status||booked.intent,confirmed:booked.booking_status==='confirmed',crm_appointment:bookedInCrm},
+      service_context:{first_reply:String(s1.data?.reply||'').slice(0,120),detail_reply:String(s2.data?.reply||'').slice(0,180),kept:contextKept},
+      crm_ok:appointments.ok&&appointments.data?.ok===true
+    }));
+  }catch(e){console.error('DEMO_FULL_REGRESSION_FAILED',e?.message||e)}
+}
 setTimeout(selfTest,2500);
