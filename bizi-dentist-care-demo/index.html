@@ -4,58 +4,80 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b1713">
-  <meta name="description" content="Create a personalised live dental clinic operations demo.">
-  <title>Your Clinic Demo</title>
+  <meta name="description" content="Experience the Bizi Systems Dental Care Packages inside a personalised clinic demo.">
+  <title>Bizi Systems Dental Care Demo</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <main>
     <section id="builder" class="builder">
-      <div class="builder-wrap">
+      <div class="sales-shell">
         <div class="builder-copy">
-          <div class="tiny-brand">BIZI SYSTEMS · DENTAL</div>
-          <h1>See what your front desk could feel like when the repetitive work disappears.</h1>
-          <p>This is not a feature tour. Put in your clinic details and step into a working demo branded like it already belongs to you.</p>
-          <div class="outcome-strip">
-            <span>Faster patient replies</span><i></i><span>Fewer missed enquiries</span><i></i><span>Clearer staff handoff</span>
-          </div>
+          <div class="tiny-brand">BIZI SYSTEMS · DENTAL CARE PACKAGES</div>
+          <h1>Experience what a calmer front desk could look like inside your own clinic.</h1>
+          <p>Choose a Care level first. Then give us a few clinic details and we will turn the demo into <strong>your clinic</strong> so you can experience the patient side and the staff side yourself.</p>
+          <div class="outcome-strip"><span>Faster patient replies</span><i></i><span>Fewer missed enquiries</span><i></i><span>Clearer staff handoff</span><i></i><span>Less repetitive front-desk work</span></div>
         </div>
 
-        <form id="builderForm" class="builder-card">
-          <div class="card-head"><div><small>BUILD YOUR CLINIC DEMO</small><h2>Make it yours</h2></div><span>about 30 seconds</span></div>
-          <label><span>Clinic name</span><input id="clinicName" maxlength="60" placeholder="Pearl Dental Clinic" required></label>
-          <div class="two-col">
-            <label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label>
-            <label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#26705b"><b id="colorText">#26705B</b></div></label>
-          </div>
-          <div class="two-col">
-            <label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label>
-            <label><span>Example price</span><input id="servicePrice" maxlength="32" value="₦25,000"></label>
-          </div>
+        <section class="care-picker" aria-labelledby="careHeading">
+          <div class="care-heading"><small>STEP 1 · CHOOSE THE OUTCOME</small><h2 id="careHeading">Three levels. One patient journey.</h2><p>Each level lets you experience what changes for the clinic, not just read a list of features.</p></div>
+          <div class="care-grid">
+            <article class="care-card" data-care-card="1">
+              <div class="care-card-top"><span>CARE 01</span><b>Essential</b></div>
+              <h3>Stop repeating the same answers.</h3>
+              <p>Patients get quick approved answers. Useful enquiries and appointment preferences are captured so staff only steps in when needed.</p>
+              <div class="care-price"><strong>≈ ₦160k</strong><span>setup</span></div>
+              <small class="managed">≈ ₦40k/month managed</small>
+              <ul><li>Patient Assistant</li><li>Simple enquiry table</li><li>Appointment request capture</li><li>Human handoff</li></ul>
+              <button type="button" data-pick-level="1">Experience Care 1 <span>→</span></button>
+            </article>
 
-          <fieldset class="levels">
-            <legend>Which outcome do you want to experience?</legend>
-            <label class="level-option">
+            <article class="care-card featured" data-care-card="2">
+              <div class="recommended">MOST USEFUL FOR GROWING CLINICS</div>
+              <div class="care-card-top"><span>CARE 02</span><b>Operations</b></div>
+              <h3>Stop losing track of patient conversations.</h3>
+              <p>The conversation becomes organised front-desk work: booking state, follow-up, patient context and human takeover in one branded workspace.</p>
+              <div class="care-price"><strong>≈ ₦300k</strong><span>setup</span></div>
+              <small class="managed">≈ ₦70k/month managed</small>
+              <ul><li>Everything in Care 1</li><li>Branded multi-page CRM</li><li>Availability-aware booking</li><li>Follow-up workflow</li></ul>
+              <button type="button" data-pick-level="2">Experience Care 2 <span>→</span></button>
+            </article>
+
+            <article class="care-card" data-care-card="3">
+              <div class="care-card-top"><span>CARE 03</span><b>Custom</b></div>
+              <h3>Run patient intake through one clinic ecosystem.</h3>
+              <p>Website, chat and other approved channels can feed the same custom operations layer instead of creating separate piles of work.</p>
+              <div class="care-price"><strong>Custom quote</strong><span>after discovery</span></div>
+              <small class="managed">scope matched to the clinic</small>
+              <ul><li>Everything in Care 2</li><li>Branded website experience</li><li>Custom channels and modules</li><li>Multi-location / deeper operations</li></ul>
+              <button type="button" data-pick-level="3">Experience Care 3 <span>→</span></button>
+            </article>
+          </div>
+        </section>
+
+        <section id="customise" class="customise-block">
+          <div class="customise-copy"><small>STEP 2 · MAKE THE DEMO YOURS</small><h2>Now make it feel like your clinic.</h2><p>Use synthetic business details only. We create a temporary demo tenant that expires automatically.</p></div>
+          <form id="builderForm" class="builder-card">
+            <div class="card-head"><div><small>YOUR DEMO CLINIC</small><h2>Personalise the experience</h2></div><span id="selectedCareBadge">Care 2 selected</span></div>
+            <div class="hidden-levels" aria-hidden="true">
               <input type="radio" name="level" value="1">
-              <span class="level-num">01</span>
-              <span><strong>Stop repeating the same answers</strong><small>Patients get fast replies and useful enquiries land in a simple staff table.</small></span>
-            </label>
-            <label class="level-option selected">
               <input type="radio" name="level" value="2" checked>
-              <span class="level-num">02</span>
-              <span><strong>Stop losing track of patient conversations</strong><small>Enquiries, booking state, follow-up and human takeover stay in one branded workspace.</small></span>
-              <em>Most useful for growing clinics</em>
-            </label>
-            <label class="level-option">
               <input type="radio" name="level" value="3">
-              <span class="level-num">03</span>
-              <span><strong>Run patient intake through one clinic system</strong><small>Your website and other approved channels can feed the same custom operations flow.</small></span>
-            </label>
-          </fieldset>
-
-          <button id="buildBtn" class="build-btn" type="submit"><span>Show me my clinic</span><b>→</b></button>
-          <p class="safe-note">Synthetic demo only. Do not enter real patient information.</p>
-        </form>
+            </div>
+            <label><span>Clinic name</span><input id="clinicName" maxlength="60" placeholder="Pearl Dental Clinic" required></label>
+            <div class="two-col">
+              <label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label>
+              <label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#26705b"><b id="colorText">#26705B</b></div></label>
+            </div>
+            <div class="two-col">
+              <label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label>
+              <label><span>Example price</span><input id="servicePrice" maxlength="32" value="₦25,000"></label>
+            </div>
+            <div id="selectedOutcome" class="selected-outcome"><small>YOU ARE ABOUT TO EXPERIENCE</small><strong>Care 2 · A patient conversation becoming organised front-desk work.</strong></div>
+            <button id="buildBtn" class="build-btn" type="submit"><span>Enter my clinic demo</span><b>→</b></button>
+            <p class="safe-note">Synthetic demo only. Do not enter real patient information.</p>
+          </form>
+        </section>
       </div>
     </section>
 
@@ -67,8 +89,13 @@
           <button data-view="staff">What staff sees</button>
           <button data-view="website" id="websiteTab">Website experience</button>
         </div>
-        <button id="tryAnother" class="try-another">Try another level</button>
+        <button id="tryAnother" class="try-another">Back to Care levels</button>
       </header>
+
+      <div id="demoGuide" class="demo-guide">
+        <div><span id="guideStep">1 of 3</span><div><small id="guideKicker">WELCOME TO YOUR LIVE DEMO</small><strong id="guideTitle">Start as a patient.</strong><p id="guideCopy">Use the sandbox like a real patient. The important part is what happens to the work behind the scenes.</p></div></div>
+        <div class="guide-actions"><button id="guideDismiss" type="button">Hide guide</button><button id="guideNext" type="button">Next step →</button></div>
+      </div>
 
       <div class="experience-shell">
         <section class="view active" data-panel="patient">
@@ -76,7 +103,6 @@
             <div><small id="patientOutcomeLabel">PATIENT EXPERIENCE</small><h2 id="patientOutcomeTitle">A patient gets an answer without waiting for the front desk.</h2><p id="patientOutcomeCopy">Use the chat exactly like a patient would. Ask about pricing, appointments, or something that should be handed to staff.</p></div>
             <span id="liveBadge" class="live-badge"><i></i> Live demo tenant</span>
           </div>
-
           <div class="patient-grid">
             <div class="phone">
               <div class="phone-head"><span id="phoneLogo">PD</span><div><strong id="phoneClinic">Pearl Dental Clinic</strong><small>online</small></div></div>
@@ -85,7 +111,6 @@
               <div id="quickReplies" class="quick-replies"></div>
               <form id="chatForm" class="composer"><input id="chatInput" maxlength="700" autocomplete="off" placeholder="Message the clinic"><button aria-label="Send">➤</button></form>
             </div>
-
             <aside class="patient-side">
               <div class="story-card"><small>WHAT CHANGED FOR THE CLINIC?</small><strong id="storyTitle">The enquiry is no longer stuck in one chat.</strong><p id="storyCopy">As the patient talks, the system turns useful information into staff-visible work.</p></div>
               <div class="state-card"><div class="state-head"><strong>Demo state</strong><span id="automationState">Assistant active</span></div><div id="stateRows"></div></div>
@@ -95,7 +120,7 @@
         </section>
 
         <section class="view" data-panel="staff">
-          <div class="view-intro">
+          <div class="view-intro compact-intro">
             <div><small>STAFF EXPERIENCE</small><h2 id="staffTitle">Everything useful from the conversation is already organised.</h2><p id="staffCopy">No one needs to search through WhatsApp history to figure out what the patient wanted or what should happen next.</p></div>
             <button id="refreshStaff" class="refresh-btn">Refresh demo data</button>
           </div>
@@ -103,8 +128,8 @@
         </section>
 
         <section class="view" data-panel="website">
-          <div class="view-intro">
-            <div><small>CUSTOM EXPERIENCE</small><h2>See a website enquiry become staff work without being copied by hand.</h2><p>This is the Care 3 preview: a branded clinic website, web enquiry form and patient assistant feeding the same operations layer.</p></div>
+          <div class="view-intro compact-intro">
+            <div><small>CUSTOM EXPERIENCE</small><h2>Your clinic website becomes another doorway into the same patient workflow.</h2><p>The form and the live website assistant are inside the generated website. Submit something there, then open the staff CRM and see it arrive.</p></div>
             <span class="custom-note">Custom scope · real integrations require clinic account access</span>
           </div>
           <div id="websiteExperience" class="website-experience"></div>
