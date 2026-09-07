@@ -22,7 +22,10 @@ async function loadConfigWithSession(clientKey){const cfg=await core('bizi-demo-
 
 const demoInputState=new Map();
 const invalidDemoName=/^(?:admin|administrator|root|system|bot|assistant|receptionist|test|testing|null|undefined|anonymous|n\/?a|none)$/i;
+const negativePhoneChoice=v=>/^(?:no|nope|different|change|another|wrong)(?:\s*[,.]?\s*(?:please)?)?$/i.test(String(v||'').trim());
+function demoPhone(v){let p=String(v||'').trim().replace(/[\s()\-.]/g,'');const m=p.match(/(?:\+?234\d{10}|0\d{10})/);if(m)p=m[0];if(/^0\d{10}$/.test(p))return '+234'+p.slice(1);if(/^234\d{10}$/.test(p))return '+'+p;if(/^\+234\d{10}$/.test(p))return p;if(/^\+?[1-9]\d{7,14}$/.test(p))return p.startsWith('+')?p:'+'+p;return null}
 function invalidNameReply(enquiryId){return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'Please enter a real person name for the appointment.',choices:[],menu_choices:[],intent:'collect_name',validation_error:'invalid_name'}}}
+function invalidPhoneReply(enquiryId){return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'Please send a valid phone number the clinic can use for the appointment.',choices:[],menu_choices:[],intent:'collect_phone',validation_error:'invalid_phone'}}}
 
 async function contextualServiceReply(clientKey,enquiryId,message,assistant){
   if(!enquiryId||assistant?.intent!=='browse'||/\bservices\b/i.test(message)||!/\b(service|price|cost|details|more about it)\b/i.test(message))return null;
@@ -43,11 +46,14 @@ async function repairBooking(clientKey,enquiryId,message,assistant){
 
 async function handleChat(body){
   const clientKey=String(body?.client_key||''),sessionId=String(body?.session_id||''),enquiryId=String(body?.enquiry_id||''),staffId=String(body?.staff_id||''),message=String(body?.message||'').trim().slice(0,12000);if(!clientKey.startsWith('demo-')||!sessionId||!message)return {status:400,data:{ok:false,error:'demo_chat_fields_required'}};
-  if(demoInputState.get(sessionId)==='collect_name'&&invalidDemoName.test(message)){return invalidNameReply(enquiryId)}
+  const stage=demoInputState.get(sessionId);
+  if(stage==='collect_name'&&invalidDemoName.test(message))return invalidNameReply(enquiryId);
+  if(stage==='confirm_phone'&&negativePhoneChoice(message)){demoInputState.set(sessionId,'collect_phone');return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'No problem. Send me the phone number you want the clinic to use.',choices:[],menu_choices:[],intent:'collect_phone'}}}
+  if(stage==='collect_phone'&&!demoPhone(message))return invalidPhoneReply(enquiryId);
   if(/\b(human|person|staff|receptionist|talk to someone|speak to someone)\b/i.test(message)&&enquiryId&&staffId){demoInputState.delete(sessionId);const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:enquiryId,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)return a;return {status:200,data:{ok:true,enquiry_id:enquiryId,handoff:true,suppressed:false,reply:'Of course. I’ll hand this conversation to the clinic team now.',choices:[],menu_choices:[]}}}
   const r=await core('bizi-core-assistant',{action:'chat',client_key:clientKey,message,session_id:sessionId,is_demo:true,context:{}});if(!r.ok||r.data?.ok===false)return r;
   const effectiveEnquiry=r.data?.enquiry_id||enquiryId||null;
-  if(r.data?.intent==='collect_name')demoInputState.set(sessionId,'collect_name');else demoInputState.delete(sessionId);
+  if(r.data?.intent==='collect_name')demoInputState.set(sessionId,'collect_name');else if(r.data?.intent==='confirm_phone')demoInputState.set(sessionId,'confirm_phone');else if(r.data?.intent==='collect_phone')demoInputState.set(sessionId,'collect_phone');else demoInputState.delete(sessionId);
   const repaired=await repairBooking(clientKey,effectiveEnquiry,message,r.data);if(repaired){demoInputState.delete(sessionId);return {status:200,data:repaired}}
   const contextual=await contextualServiceReply(clientKey,effectiveEnquiry,message,r.data);if(contextual)return {status:200,data:contextual};
   if(r.data?.handoff===true&&effectiveEnquiry&&staffId){demoInputState.delete(sessionId);const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:effectiveEnquiry,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)console.error('DEMO_HANDOFF_STATE_FAILED',a.status,a.data?.error||'unknown')}
@@ -72,7 +78,7 @@ async function api(req,res,u){
   return send(res,r.status,r.data)
 }
 
-const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:12,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true,full_regression:true,demo_input_validation:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
+const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url||'/','http://localhost');if(req.method==='GET'&&u.pathname==='/health')return send(res,200,{ok:true,service:'bizi-dentist-live-demo',version:13,core_backed:true,booking_repair:true,guided_demo_ready:true,v2_assets:true,viewport_fit:true,full_regression:true,demo_input_validation:true,phone_change_validation:true});if(u.pathname.startsWith('/api/')){if(req.method!=='POST')return send(res,405,{ok:false,error:'method_not_allowed'});return api(req,res,u)}if(req.method!=='GET'&&req.method!=='HEAD')return send(res,405,{ok:false,error:'method_not_allowed'});const entry=files[u.pathname];if(!entry)return send(res,404,{ok:false,error:'not_found'});const [name,type]=entry,body=await fs.readFile(path.join(__dirname,name));res.writeHead(200,{'content-type':type,...security});if(req.method==='HEAD')return res.end();res.end(body)}catch(e){console.error('LIVE_DEMO_ERROR',e?.message||e);send(res,Number(e?.status)||500,{ok:false,error:e?.message||'internal_error'})}});
 server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT));
 
 async function selfTest(){
@@ -89,7 +95,7 @@ async function selfTest(){
     const named=await sendStep('Regression Patient');
     const askPhone=await sendStep('No');
     const invalidPhone=await sendStep('123');
-    const phoneBlocked=invalidPhone.intent==='collect_phone'&&/phone/i.test(String(invalidPhone.reply||''));
+    const phoneBlocked=invalidPhone.validation_error==='invalid_phone'&&invalidPhone.intent==='collect_phone';
     const phone=await sendStep('07040070706');
     const invalidEmail=await sendStep('not-an-email');
     const emailBlocked=invalidEmail.intent==='collect_email'&&/email/i.test(String(invalidEmail.reply||''));
