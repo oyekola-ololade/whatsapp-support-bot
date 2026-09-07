@@ -95,22 +95,29 @@ async function captureAll() {
     await page.waitForTimeout(500);
     await shot(page,'06-care3-website.png',true);
 
+    const evidenceToken = Date.now().toString().slice(-8);
+    const evidenceName = `Launch Demo Patient ${evidenceToken}`;
+    const evidenceEmail = `launch.demo.${evidenceToken}@example.com`;
+    const evidencePhoneInput = '08030000000';
+    const evidencePhone = '+2348030000000';
+
     const form = page.locator('#webForm');
     await form.scrollIntoViewIfNeeded();
-    await page.locator('#webName').fill('Launch Demo Patient');
-    await page.locator('#webEmail').fill('launch.demo@example.com');
-    await page.locator('#webPhone').fill('08030000000');
+    await page.locator('#webName').fill(evidenceName);
+    await page.locator('#webEmail').fill(evidenceEmail);
+    await page.locator('#webPhone').fill(evidencePhoneInput);
     await page.locator('#webDate').fill(tomorrowISO());
     await page.waitForFunction(()=>{const s=document.querySelector('#webTime');return s && !s.disabled && [...s.options].some(o=>o.value);});
     const option = await page.locator('#webTime option').evaluateAll(opts=>opts.map(o=>o.value).find(Boolean));
     await page.locator('#webTime').selectOption(option);
     await page.locator('#webMessage').fill('I would like to confirm the appointment details.');
-    await page.waitForTimeout(300);
-    await page.locator('#appointmentFormSection').screenshot({path:path.join(OUT,'07-care3-website-form.png')});
 
+    // The launch evidence must show a real successful submission, not merely a filled form.
     await form.locator('button').click();
     await page.locator('#webFlow.show').waitFor();
     await page.waitForTimeout(500);
+    await page.locator('#webFlow').screenshot({path:path.join(OUT,'07-care3-website-form.png')});
+
     await page.locator('#flowOpenCrm').click();
     await page.locator('#staffSurface .clinic-crm').waitFor();
     await page.locator('[data-crm="enquiries"]').click();
@@ -120,17 +127,33 @@ async function captureAll() {
     let websiteRow = null;
     for (let i=0;i<afterCount;i++) {
       const txt = (await afterRows.nth(i).innerText()).toLowerCase();
-      if (txt.includes('website') || txt.includes('launch demo patient')) { websiteRow = afterRows.nth(i); break; }
+      if (txt.includes(evidenceName.toLowerCase())) { websiteRow = afterRows.nth(i); break; }
     }
-    if (websiteRow) {
-      await websiteRow.click();
-      await page.locator('#detail').waitFor();
-      await page.waitForTimeout(300);
+    if (!websiteRow) throw new Error(`submitted_website_enquiry_not_found:${evidenceName}`);
+
+    await websiteRow.click();
+    await page.locator('#detail').waitFor();
+    await page.locator('#takeoverAction').waitFor();
+    await page.waitForTimeout(300);
+
+    const detailText = (await page.locator('#detail').innerText()).toLowerCase();
+    const requiredEvidence = [evidenceName.toLowerCase(), evidenceEmail.toLowerCase(), evidencePhone.toLowerCase(), 'website'];
+    for (const expected of requiredEvidence) {
+      if (!detailText.includes(expected)) throw new Error(`crm_evidence_missing:${expected}`);
     }
+    const actionText = (await page.locator('#takeoverAction').innerText()).trim().toLowerCase();
+    if (!actionText.includes('contact patient')) throw new Error(`crm_action_mismatch:${actionText}`);
+
     await shot(page,'08-website-enquiry-crm.png',true);
 
     lastRun = new Date().toISOString();
-    return {ok:true,lastRun,assets:files.map(f=>`/assets/${f}`),finalUrl:page.url()};
+    return {
+      ok:true,
+      lastRun,
+      assets:files.map(f=>`/assets/${f}`),
+      finalUrl:page.url(),
+      websiteEvidence:{name:evidenceName,email:evidenceEmail,phone:evidencePhone,source:'website',action:'Contact patient'}
+    };
   } catch (e) {
     lastError = String(e?.stack || e?.message || e);
     return {ok:false,error:lastError};
@@ -165,7 +188,7 @@ server.listen(PORT,'0.0.0.0',()=>{
   console.log('BIZI_SCREENSHOT_RUNNER_READY',PORT);
   setTimeout(async()=>{
     const out=await captureAll();
-    if(out.ok) console.log(`BIZI_AUTO_CAPTURE_COMPLETE|${out.lastRun}|${out.assets.length}`);
+    if(out.ok) console.log(`BIZI_AUTO_CAPTURE_COMPLETE|${out.lastRun}|${out.assets.length}|${out.websiteEvidence?.name||''}`);
     else console.error(`BIZI_AUTO_CAPTURE_FAILED|${String(out.error||'unknown')}`);
   },1500);
 });
