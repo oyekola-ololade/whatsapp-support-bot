@@ -1,3 +1,4 @@
+// Uses the cropped official Bizi Systems asset so the full logo stays visible at small sizes.
 (()=>{
   const phone='2347074396136';
   const chatUrl=text=>'https://wa.me/'+phone+'?text='+encodeURIComponent(text);
