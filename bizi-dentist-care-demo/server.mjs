@@ -31,8 +31,8 @@ async function contextualServiceReply(clientKey,enquiryId,message,assistant){
   if(!enquiryId||assistant?.intent!=='browse'||/\bservices\b/i.test(message)||!/\b(service|price|cost|details|more about it)\b/i.test(message))return null;
   const d=await core('bizi-core-crm',{action:'enquiry_detail',client_key:clientKey,is_demo:true,enquiry_id:enquiryId});if(!d.ok||!d.data?.enquiry?.service?.slug)return null;
   const cfg=await core('bizi-demo-generator',{action:'config',client_key:clientKey});const svc=(cfg.data?.services||[]).find(x=>x.slug===d.data.enquiry.service.slug)||d.data.enquiry.service;
-  const price=svc.price_display||'Price confirmed by the clinic',desc=svc.public_description||`${svc.name} is available at this clinic.`;
-  return {ok:true,enquiry_id:enquiryId,handoff:false,suppressed:false,reply:`${svc.name}: ${desc} ${price==='Price confirmed by clinic'?'The clinic confirms the current price before booking.':`Current demo price: ${price}.`} If you want, I can help you book it.`,choices:[],menu_choices:[],intent:'service_detail'};
+  const desc=svc.public_description||`${svc.name} is available at this clinic.`;
+  return {ok:true,enquiry_id:enquiryId,handoff:false,suppressed:false,reply:`${svc.name}: ${desc} If you want, I can help you request an appointment.`,choices:[],menu_choices:[],intent:'service_detail'};
 }
 
 async function repairBooking(clientKey,enquiryId,message,assistant){
@@ -51,6 +51,7 @@ async function handleChat(body){
   if(stage==='confirm_phone'&&negativePhoneChoice(message)){demoInputState.set(sessionId,'collect_phone');return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'No problem. Send me the phone number you want the clinic to use.',choices:[],menu_choices:[],intent:'collect_phone'}}}
   if(stage==='collect_phone'&&!demoPhone(message))return invalidPhoneReply(enquiryId);
   if(/\b(human|person|staff|receptionist|talk to someone|speak to someone)\b/i.test(message)&&enquiryId&&staffId){demoInputState.delete(sessionId);const a=await core('bizi-core-crm',{action:'staff_action',client_key:clientKey,is_demo:true,enquiry_id:enquiryId,action_type:'take_over',staff_id:staffId});if(!a.ok||a.data?.ok===false)return a;return {status:200,data:{ok:true,enquiry_id:enquiryId,handoff:true,suppressed:false,reply:'Of course. I’ll hand this conversation to the clinic team now.',choices:[],menu_choices:[]}}}
+  if(/\b(price|pricing|cost|fee|how much)\b/i.test(message))return {status:200,data:{ok:true,enquiry_id:enquiryId||null,handoff:false,suppressed:false,reply:'Treatment pricing is discussed privately after the clinic understands what you need. I can help you request an appointment or connect you with staff.',choices:[],menu_choices:[],intent:'pricing_private'}};
   const r=await core('bizi-core-assistant',{action:'chat',client_key:clientKey,message,session_id:sessionId,is_demo:true,context:{}});if(!r.ok||r.data?.ok===false)return r;
   const effectiveEnquiry=r.data?.enquiry_id||enquiryId||null;
   if(r.data?.intent==='collect_name')demoInputState.set(sessionId,'collect_name');else if(r.data?.intent==='confirm_phone')demoInputState.set(sessionId,'confirm_phone');else if(r.data?.intent==='collect_phone')demoInputState.set(sessionId,'collect_phone');else demoInputState.delete(sessionId);
@@ -91,7 +92,7 @@ server.listen(PORT,'0.0.0.0',()=>console.log('BIZI_DENTIST_LIVE_DEMO_READY',PORT
 async function selfTest(){
   if(!RUN_SELF_TEST)return;
   try{
-    const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Regression Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'₦25,000',package_level:2});
+    const created=await core('bizi-demo-generator',{action:'create_demo',clinic_name:'Regression Dental Test',location:'Demo City',brand_color:'#245f9d',featured_service:'Dental Cleaning',featured_price:'',package_level:2});
     if(!created.ok||!created.data?.client_key)throw new Error(`create:${created.status}:${created.data?.error||'failed'}`);
     const k=created.data.client_key,cfg=await loadConfigWithSession(k),sid=cfg.data.demo_session_id,staff=cfg.data.staff?.id;let eid=cfg.data.demo_enquiry_id;
     const sendStep=async(message)=>{const r=await handleChat({client_key:k,session_id:sid,enquiry_id:eid,staff_id:staff,message});if(r.status>=400)throw new Error(`chat:${message}:${r.status}:${r.data?.error||'failed'}`);eid=r.data?.enquiry_id||eid;return r.data};
@@ -116,7 +117,7 @@ async function selfTest(){
 
     const cfg2=await loadConfigWithSession(k),sid2=cfg2.data.demo_session_id;let eid2=cfg2.data.demo_enquiry_id;
     const s1=await handleChat({client_key:k,session_id:sid2,enquiry_id:eid2,staff_id:staff,message:'Dental Consultation'});eid2=s1.data?.enquiry_id||eid2;
-    const s2=await handleChat({client_key:k,session_id:sid2,enquiry_id:eid2,staff_id:staff,message:'service and price'});
+    const s2=await handleChat({client_key:k,session_id:sid2,enquiry_id:eid2,staff_id:staff,message:'service details'});
     const contextKept=/Dental Consultation/i.test(String(s2.data?.reply||''))&&!/current services/i.test(String(s2.data?.reply||''));
 
     console.log('DEMO_FULL_REGRESSION',JSON.stringify({
