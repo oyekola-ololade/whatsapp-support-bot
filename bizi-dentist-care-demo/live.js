@@ -146,7 +146,7 @@ async function submitWebsite(e){
 
 async function createDemo(e){
   e.preventDefault();const btn=$('#buildBtn'),selected=Number($('input[name="level"]:checked').value);btn.disabled=true;btn.querySelector('span').textContent='Building your clinic…';
-  try{demo=await api('/api/create',{clinic_name:$('#clinicName').value,location:$('#location').value,brand_color:$('#brandColor').value,featured_service:$('#serviceName').value,featured_price:$('#servicePrice').value,package_level:selected});history.replaceState(null,'',`${location.pathname}?demo=${encodeURIComponent(demo.client.client_key)}`);$('#builder').classList.add('hidden');$('#experience').classList.remove('hidden');applyDemo();switchView('patient');window.scrollTo({top:0});}
+  try{demo=await api('/api/create',{clinic_name:$('#clinicName').value,location:$('#location').value,brand_color:$('#brandColor').value,featured_service:$('#serviceName').value,package_level:selected});history.replaceState(null,'',`${location.pathname}?demo=${encodeURIComponent(demo.client.client_key)}`);$('#builder').classList.add('hidden');$('#experience').classList.remove('hidden');applyDemo();switchView('patient');window.scrollTo({top:0});}
   catch(err){toast(err.message)}finally{btn.disabled=false;btn.querySelector('span').textContent='Show me my clinic'}
 }
 async function loadDemo(key){
