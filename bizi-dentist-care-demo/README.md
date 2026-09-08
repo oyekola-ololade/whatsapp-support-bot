@@ -14,7 +14,7 @@ https://bizi-dentist-demo-production.up.railway.app/
 
 This is not positioned as only a chatbot. The demo shows a patient-operations workflow where enquiries become structured work for clinic staff.
 
-- Patient questions and service/pricing enquiries
+- Patient questions, service enquiries and appointment requests
 - Appointment request / booking state
 - Structured patient context
 - Staff CRM / operations workspace
@@ -23,14 +23,14 @@ This is not positioned as only a chatbot. The demo shows a patient-operations wo
 - Care 3 website intake into the same staff system
 - Clinic-specific branding and synthetic demo tenants
 
+Public demo pricing is intentionally suppressed. Commercial pricing is handled separately from the product walkthrough.
+
 ## Care packages
 
 ### Care 1 — Essential
 **Never miss another patient enquiry.**
 
 Patient Assistant + Simple Enquiry Table.
-
-Approx. ₦160k setup + approx. ₦40k/month managed.
 
 Includes approved answers, enquiry capture, appointment-request capture, lightweight staff visibility and human handoff.
 
@@ -39,8 +39,6 @@ Includes approved answers, enquiry capture, appointment-request capture, lightwe
 
 Patient Assistant + Enquiry CRM.
 
-Approx. ₦300k setup + approx. ₦70k/month managed.
-
 Adds the branded multi-page staff CRM, availability-aware booking, patient directory, follow-up workflow, activity context and structured staff actions.
 
 ### Care 3 — Custom
@@ -48,15 +46,13 @@ Adds the branded multi-page staff CRM, availability-aware booking, patient direc
 
 Custom Clinic Operations Platform.
 
-Custom quote after discovery.
-
 Extends the Care 2 foundation with the generated clinic website, unified intake concept, additional approved channels, clinic-specific routing and custom operational modules.
 
-## Final review status — 2026-09-07
+## Final review status — 2026-09-08
 
-The final reviewed deployment passed the user-led end-to-end walkthrough for the launch build.
+The production demo remains on the reviewed launch flow, with the September 8 pricing-removal pass applied on top of the previously verified build.
 
-Verified:
+Verified from the reviewed flow and retained product behavior:
 
 - Care selection and personalisation are separate screens.
 - The homepage exposes the Care choices first; personalisation is a separate routed state with the selected package preselected.
@@ -74,6 +70,9 @@ Verified:
 - Website enquiries appear in the staff workspace.
 - Website-only leads use **Contact patient**, rather than **Take over conversation**.
 - Care 3 Unified intake remains the first staff-side differentiation view.
+- Public package, personalisation, patient and website experiences no longer expose commercial pricing.
+
+Current production commit: `381c86fa4be89ff49915d075cee2a28fd181a641`.
 
 ## Product truth boundary
 
@@ -109,7 +108,7 @@ The source is intentionally tenant-aware. Demo configuration is stored per gener
 
 ## Automated launch verification / screenshots
 
-The `bizi-demo-screenshot-runner` service uses Playwright against the production demo. On startup it automatically runs the same launch path and writes eight PNG assets:
+The `bizi-demo-screenshot-runner` source uses Playwright against the production demo and writes eight PNG assets:
 
 1. `01-home-care-packages.png`
 2. `02-care3-personalisation.png`
@@ -122,9 +121,11 @@ The `bizi-demo-screenshot-runner` service uses Playwright against the production
 
 The automated path covers package selection, Care 3 personalisation, generated demo entry, staff CRM, human takeover, generated website, website appointment submission, and the resulting website enquiry inside the CRM.
 
+The runner was updated on September 8 so it no longer tries to fill the removed service-price field. Fresh captures can therefore use the pricing-free personalisation flow.
+
 ## Final launch asset checklist
 
-Capture / retain the reviewed build before making additional non-launch code changes:
+Fresh screenshots should come from the current pricing-free production build:
 
 1. Three-package homepage
 2. Personalisation screen
@@ -144,7 +145,7 @@ Recommended 60–120 second prospect walkthrough:
 1. Package homepage
 2. Pick Care 2 or Care 3
 3. Personalise clinic + high-contrast colour
-4. Patient service/pricing interaction
+4. Show a patient service or appointment interaction
 5. Open staff workspace
 6. Take over and send staff reply
 7. Patient replies while assistant remains paused
@@ -158,6 +159,6 @@ For a technical recording, extend the walkthrough with the Railway deployment, B
 
 Production service: `bizi-dentist-demo` in the Railway `favfare-demo` project.
 
-Screenshot verification service: `bizi-demo-screenshot-runner` in the same Railway project.
+The current production deployment is successful and was created from commit `381c86fa4be89ff49915d075cee2a28fd181a641`.
 
-Use the reviewed production deployment as the source for screenshots and recording unless a launch-blocking defect is discovered.
+The screenshot-runner source remains under `bizi-demo-screenshot-runner/`. It is not currently listed as an active Railway service, so it should be treated as temporary launch tooling and only redeployed when fresh captures are required.
