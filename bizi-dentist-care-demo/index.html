@@ -61,7 +61,7 @@
             <div class="hidden-levels" aria-hidden="true"><input type="radio" name="level" value="1"><input type="radio" name="level" value="2" checked><input type="radio" name="level" value="3"></div>
             <label><span>Clinic name</span><input id="clinicName" maxlength="60" placeholder="Pearl Dental Clinic" required></label>
             <div class="two-col"><label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label><label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#26705b"><b id="colorText">#26705B</b></div></label></div>
-            <div class="two-col"><label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label><label><span>Example price</span><input id="servicePrice" maxlength="32" value="₦25,000"></label></div>
+            <label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label>
             <div id="selectedOutcome" class="selected-outcome"><small>YOU ARE ABOUT TO EXPERIENCE</small><strong>Care 2 · A patient conversation becoming organised front-desk work.</strong></div>
             <button id="buildBtn" class="build-btn" type="submit"><span>Enter my clinic demo</span><b>→</b></button>
             <p class="safe-note">Synthetic demo only. Do not enter real patient information.</p>
@@ -84,7 +84,7 @@
 
       <div class="experience-shell">
         <section class="view active" data-panel="patient">
-          <div class="view-intro"><div><small id="patientOutcomeLabel">PATIENT EXPERIENCE</small><h2 id="patientOutcomeTitle">A patient gets an answer without waiting for the front desk.</h2><p id="patientOutcomeCopy">Use the chat exactly like a patient would. Ask about pricing, appointments, or something that should be handed to staff.</p></div><span id="liveBadge" class="live-badge"><i></i> Live demo tenant</span></div>
+          <div class="view-intro"><div><small id="patientOutcomeLabel">PATIENT EXPERIENCE</small><h2 id="patientOutcomeTitle">A patient gets an answer without waiting for the front desk.</h2><p id="patientOutcomeCopy">Use the chat exactly like a patient would. Ask about services, appointments, or something that should be handed to staff.</p></div><span id="liveBadge" class="live-badge"><i></i> Live demo tenant</span></div>
           <div class="patient-grid">
             <div class="phone"><div class="phone-head"><span id="phoneLogo">PD</span><div><strong id="phoneClinic">Pearl Dental Clinic</strong><small>online</small></div></div><div class="sandbox">Sandbox · mirrors the patient conversation</div><div id="thread" class="thread"></div><div id="quickReplies" class="quick-replies"></div><form id="chatForm" class="composer"><input id="chatInput" maxlength="700" autocomplete="off" placeholder="Message the clinic"><button aria-label="Send">➤</button></form></div>
             <aside class="patient-side"><div class="story-card"><small>WHAT CHANGED FOR THE CLINIC?</small><strong id="storyTitle">The enquiry is no longer stuck in one chat.</strong><p id="storyCopy">As the patient talks, the system turns useful information into staff-visible work.</p></div><div class="state-card"><div class="state-head"><strong>Demo state</strong><span id="automationState">Assistant active</span></div><div id="stateRows"></div></div><button id="openStaff" class="staff-jump">See what your team sees →</button></aside>
