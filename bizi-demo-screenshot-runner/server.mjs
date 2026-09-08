@@ -58,7 +58,6 @@ async function captureAll() {
     await page.locator('#clinicName').fill('Bizi Green Dental');
     await page.locator('#location').fill('Lagos, Nigeria');
     await page.locator('#serviceName').fill('Dental Cleaning');
-    await page.locator('#servicePrice').fill('₦25,000');
     await page.locator('#brandColor').evaluate(el=>{el.value='#18A36B';el.dispatchEvent(new Event('input',{bubbles:true}));});
     await page.waitForTimeout(300);
     await shot(page,'02-care3-personalisation.png',true);
