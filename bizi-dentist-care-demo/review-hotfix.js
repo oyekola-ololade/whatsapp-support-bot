@@ -1,8 +1,8 @@
 (()=>{
   const normalizeWho=who=>who==='user'?'patient':who==='patient'?'patient':who==='staff'?'staff':'assistant';
   const normalizePhone=v=>{let p=String(v||'').trim().replace(/[\s()\-.]/g,'');if(/^0\d{10}$/.test(p))return '+234'+p.slice(1);if(/^234\d{10}$/.test(p))return '+'+p;if(/^\+234\d{10}$/.test(p))return p;if(/^\+?[1-9]\d{7,14}$/.test(p))return p.startsWith('+')?p:'+'+p;return null};
-  const accent=()=>demo?.client?.branding?.accent||'#26705b';
-  const rgbText=hex=>{const n=parseInt(String(hex||'').replace('#',''),16);return Number.isFinite(n)?`${(n>>16)&255},${(n>>8)&255},${n&255}`:'38,112,91'};
+  const accent=()=>demo?.client?.branding?.accent||'#2E66B8';
+  const rgbText=hex=>{const n=parseInt(String(hex||'').replace('#',''),16);return Number.isFinite(n)?`${(n>>16)&255},${(n>>8)&255},${n&255}`:'46,102,184'};
   const takeoverBusy=new Set();
 
   function forceBrand(){

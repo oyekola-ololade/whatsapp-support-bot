@@ -4,8 +4,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const initials=name=>String(name||'Clinic').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'DC';
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2600)};
 async function api(path,body){const r=await fetch(path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const text=await r.text();let d;try{d=text?JSON.parse(text):{}}catch{d={ok:false,error:'Invalid demo response'}}if(!r.ok||d?.ok===false)throw new Error(d?.error||'Demo request failed');return d}
-function rgb(hex){const n=parseInt(String(hex).replace('#',''),16);return Number.isFinite(n)?[(n>>16)&255,(n>>8)&255,n&255]:[38,112,91]}
-function setBrand(hex){const safe=/^#[0-9a-f]{6}$/i.test(hex)?hex:'#26705b';document.documentElement.style.setProperty('--brand',safe);document.documentElement.style.setProperty('--brand-rgb',rgb(safe).join(','))}
+function rgb(hex){const n=parseInt(String(hex).replace('#',''),16);return Number.isFinite(n)?[(n>>16)&255,(n>>8)&255,n&255]:[46,102,184]}
+function setBrand(hex){const safe=/^#[0-9a-f]{6}$/i.test(hex)?hex:'#2E66B8';document.documentElement.style.setProperty('--brand',safe);document.documentElement.style.setProperty('--brand-rgb',rgb(safe).join(','))}
 
 let demo=null,level=2,messages=[],pendingChoices=[],handoff=false,lastEnquiryId=null,sessionId='',remote='',p1={stage:'idle',name:'',email:'',date:'',time:''};
 const outcome={
@@ -25,7 +25,7 @@ function switchView(view){
 }
 function applyDemo(){
   const c=demo.client,brand=c.branding||{},name=c.display_name,loc=brand.location||c.metadata?.location||'Your clinic';
-  level=Number(c.metadata?.package_level||2);setBrand(brand.accent||'#26705b');
+  level=Number(c.metadata?.package_level||2);setBrand(brand.accent||'#2E66B8');
   sessionId=demo.demo_session_id;remote=demo.demo_remote;lastEnquiryId=demo.demo_enquiry_id||null;
   const ini=brand.logo_text||initials(name);$('#clinicLogo').textContent=ini;$('#phoneLogo').textContent=ini;
   $('#clinicTitle').textContent=name;$('#clinicSub').textContent=`${loc} · your live demo`;$('#phoneClinic').textContent=name;

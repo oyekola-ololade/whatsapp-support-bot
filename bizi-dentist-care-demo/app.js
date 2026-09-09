@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* Final review behavior: explicit clinic-brand propagation, patient replies during takeover, and website-specific staff action. */
 (()=>{
-  const accent=()=>demo?.client?.branding?.accent||'#26705b';
-  const rgbText=hex=>{const n=parseInt(String(hex||'').replace('#',''),16);return Number.isFinite(n)?`${(n>>16)&255},${(n>>8)&255},${n&255}`:'38,112,91'};
+  const accent=()=>demo?.client?.branding?.accent||'#2E66B8';
+  const rgbText=hex=>{const n=parseInt(String(hex||'').replace('#',''),16);return Number.isFinite(n)?`${(n>>16)&255},${(n>>8)&255},${n&255}`:'46,102,184'};
   const forceBrand=()=>{
     const a=accent(),r=rgbText(a);setBrand(a);
     const root=document.querySelector('#staffSurface');

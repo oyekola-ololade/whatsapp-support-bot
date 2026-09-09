@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1713">
+  <meta name="theme-color" content="#061326">
   <meta name="description" content="Experience the Bizi Systems Dental Care Packages inside a personalised clinic demo.">
   <title>Bizi Systems Dental Care Demo</title>
   <link rel="stylesheet" href="/styles.css">
@@ -11,13 +11,15 @@
   <link rel="stylesheet" href="/screenfit.css">
   <link rel="stylesheet" href="/review-hotfix.css">
   <link rel="stylesheet" href="/conversion.css">
-  <style>.bizi-wordmark{display:inline-flex;align-items:center;gap:10px}.bizi-symbol{width:34px;height:34px;border-radius:10px;background:#d7ff72;display:inline-grid;grid-template-columns:repeat(3,4px);gap:3px;place-content:center;flex:none}.bizi-symbol i{display:block;width:4px;background:#07140f;border-radius:4px}.bizi-symbol i:nth-child(1){height:15px}.bizi-symbol i:nth-child(2){height:21px}.bizi-symbol i:nth-child(3){height:10px}.tiny-brand{display:flex!important;align-items:center;gap:12px!important}.tiny-brand .care-context{opacity:.62;border-left:1px solid currentColor;padding-left:12px}</style>
+  <link rel="stylesheet" href="/bizi-blue.css">
+  <style>.bizi-wordmark{display:inline-flex;align-items:center;gap:10px}.bizi-symbol{width:34px;height:34px;border-radius:10px;background:#8FC2FF;display:inline-grid;grid-template-columns:repeat(3,4px);gap:3px;place-content:center;flex:none}.bizi-symbol i{display:block;width:4px;background:#061326;border-radius:4px}.bizi-symbol i:nth-child(1){height:15px}.bizi-symbol i:nth-child(2){height:21px}.bizi-symbol i:nth-child(3){height:10px}.tiny-brand{display:flex!important;align-items:center;gap:12px!important}.tiny-brand .care-context{opacity:.62;border-left:1px solid currentColor;padding-left:12px}</style>
 </head>
 <body>
   <main>
     <section id="builder" class="builder">
       <div class="sales-shell">
         <div class="builder-copy">
+          <figure class="bizi-hero-photo"><img src="/assets/dental-consultation.png" width="1536" height="1024" alt="Dentist and patient having a relaxed consultation in a modern dental clinic" fetchpriority="high"><figcaption>More time for the people behind every enquiry.</figcaption></figure>
           <div class="tiny-brand"><span class="bizi-wordmark"><span class="bizi-symbol" aria-hidden="true"><i></i><i></i><i></i></span><strong>BIZI SYSTEMS</strong></span><span class="care-context">DENTAL CARE PACKAGES</span></div>
           <h1>Experience what a calmer front desk could look like inside your own clinic.</h1>
           <p>Choose a Care level first. Then give us a few clinic details and we will turn the demo into <strong>your clinic</strong> so you can experience the patient side and the staff side yourself.</p>
@@ -55,12 +57,12 @@
         </section>
 
         <section id="customise" class="customise-block">
-          <div class="customise-copy"><small>STEP 2 · MAKE THE DEMO YOURS</small><h2>Now make it feel like your clinic.</h2><p>Use synthetic business details only. We create a temporary demo tenant that expires automatically.</p></div>
+          <div class="customise-copy"><img class="bizi-room-photo" src="/assets/dental-treatment-room.png" width="1536" height="1024" alt="Bright modern dental treatment room with a blue dental chair" loading="lazy"><small>STEP 2 · MAKE THE DEMO YOURS</small><h2>Now make it feel like your clinic.</h2><p>Use synthetic business details only. We create a temporary demo tenant that expires automatically.</p></div>
           <form id="builderForm" class="builder-card">
             <div class="card-head"><div><small>YOUR DEMO CLINIC</small><h2>Personalise the experience</h2></div><span id="selectedCareBadge">Care 2 selected</span></div>
             <div class="hidden-levels" aria-hidden="true"><input type="radio" name="level" value="1"><input type="radio" name="level" value="2" checked><input type="radio" name="level" value="3"></div>
             <label><span>Clinic name</span><input id="clinicName" maxlength="60" placeholder="Pearl Dental Clinic" required></label>
-            <div class="two-col"><label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label><label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#26705b"><b id="colorText">#26705B</b></div></label></div>
+            <div class="two-col"><label><span>Location</span><input id="location" maxlength="80" placeholder="Lekki, Lagos" required></label><label><span>Brand colour</span><div class="color-field"><input id="brandColor" type="color" value="#2E66B8"><b id="colorText">#2E66B8</b></div></label></div>
             <label><span>One service to personalise</span><input id="serviceName" maxlength="60" value="Dental Cleaning"></label>
             <div id="selectedOutcome" class="selected-outcome"><small>YOU ARE ABOUT TO EXPERIENCE</small><strong>Care 2 · A patient conversation becoming organised front-desk work.</strong></div>
             <button id="buildBtn" class="build-btn" type="submit"><span>Enter my clinic demo</span><b>→</b></button>

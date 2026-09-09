@@ -1,0 +1,60 @@
+/* Bizi's public identity stays blue; a visitor's chosen clinic accent remains personalisable. */
+:root{--brand:#2E66B8;--brand-rgb:46,102,184;--bg:#061326;--panel:#0B2A52;--panel2:#0B2A52;--text:#FFFFFF;--muted:#A8BCD6;--soft:#EAF3FF;--mint:#EAF3FF;--line:rgba(143,194,255,.22);--line2:rgba(143,194,255,.38)}
+body{background:#061326;color:#fff}
+.builder{background:radial-gradient(ellipse at 85% 8%,rgba(46,102,184,.24),transparent 50%),#061326!important}
+.builder-copy{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px 38px;max-width:1180px!important;text-align:left!important;align-items:center;margin-bottom:48px!important}
+.builder-copy>.tiny-brand{grid-column:1/-1;margin-bottom:4px}
+.builder-copy>h1,.builder-copy>p,.builder-copy>.outcome-strip,.builder-copy>.buyer-trust-row{grid-column:1;margin:0!important;max-width:none!important;text-align:left!important;justify-content:flex-start!important}
+.builder-copy h1{font-size:clamp(34px,3.7vw,55px)!important;line-height:1.06!important}
+.builder-copy>p{font-size:15px!important;line-height:1.7!important;color:#C7D8ED!important}
+.bizi-hero-photo{grid-column:2;grid-row:2/6;align-self:stretch;position:relative;margin:0;min-height:310px;border-radius:24px;overflow:hidden;border:1px solid rgba(143,194,255,.4);background:#0B2A52}
+.bizi-hero-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 40%;position:absolute;inset:0}
+.bizi-hero-photo figcaption{position:absolute;bottom:0;left:0;right:0;padding:42px 20px 18px;background:linear-gradient(transparent,rgba(6,19,38,.94));font-size:14px;font-weight:650;color:#fff;line-height:1.5}
+.bizi-room-photo{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:16px;margin:0 0 22px;border:1px solid rgba(143,194,255,.3)}
+.care-card{background:linear-gradient(155deg,#0B2A52,#061326)!important;border-color:rgba(143,194,255,.28)!important}
+.care-card.featured{background:linear-gradient(155deg,#163F73,#0B2A52)!important;border-color:#8FC2FF!important}
+.care-card>button,.build-btn,.bizi-contact,.bizi-conversion-actions button,.bizi-enquiry button[type=submit]{background:#2E66B8!important;color:#fff!important;border-color:#2E66B8!important}
+.care-card>button:hover,.build-btn:hover,.bizi-contact:hover,.bizi-conversion-actions button:hover{background:#0B2A52!important;border-color:#8FC2FF!important}
+.recommended{background:#8FC2FF!important;color:#061326!important}
+.care-card p,.care-card li,.care-heading p,.customise-copy p,.builder-card label>span,.safe-note,.card-head>span{color:#C7D8ED!important}
+.care-heading small,.customise-copy small,.care-card-top span,.selected-outcome small,.card-head small,.tiny-brand,.outcome-strip{color:#8FC2FF!important}
+.builder-card,.builder.personalise-mode .customise-block{background:#0B2A52!important;border-color:rgba(143,194,255,.35)!important}
+.builder-card input,.color-field{background:#061326!important;color:#fff!important;border-color:#496581!important}
+.color-field b{color:#EAF3FF!important}
+.builder-card input::placeholder{color:#A8BCD6;opacity:1}
+.experience{background:#061326!important}.clinic-header{background:rgba(6,19,38,.96)!important}
+.phone-head,.composer button,.site-chat-head-v2{background:var(--brand)!important;color:#fff}
+.thread,.phone,.site-chat-thread-v2{background:#EAF3FF!important}
+.msg.user>div,.site-chat-thread-v2 .site-user{background:#0B2A52!important;color:#fff!important}
+.msg.assistant>div,.site-chat-thread-v2>div{background:#fff;color:#061326}
+.msg.staff>div{background:#8FC2FF!important;color:#061326!important;border-left:3px solid #2E66B8}
+.msg small{opacity:.8!important}
+.quick-replies,.composer{background:#EAF3FF!important}
+.quick-replies button{color:#0B2A52!important;border-color:#496581!important}
+.composer input{color:#061326!important;border-color:#496581!important}
+.clinic-crm .crm-nav{background:linear-gradient(180deg,var(--brand),#0B2A52 45%,#061326)!important}
+.clinic-crm .crm-main,.staff-demo-frame,.care1-workspace{background:#061326!important}
+.clinic-crm .crm-card,.clinic-crm .crm-metric,.clinic-crm .staff-card,.clinic-crm .booking-row,.clinic-crm .follow-row,.clinic-crm .patient-card{background:#0B2A52!important}
+.staff-chat-msg.patient{background:#061326!important;color:#fff!important}
+.staff-chat-msg.assistant{background:#0B2A52!important;color:#fff!important}
+.staff-chat-msg.staff{background:#2E66B8!important;color:#fff!important}
+.site-v2-hero-art{position:relative!important;overflow:hidden;border-radius:20px;min-height:300px;background:#EAF3FF!important;padding:0!important}
+.bizi-website-photo{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover}
+.site-v2-hero-art .clinic-art{display:none!important}
+.fake-site-v3,.fake-site{color:#061326!important;background:#fff!important}
+.site-v2-hero,.site-why,.site-v2-contact{background:#EAF3FF!important}
+.fake-site-v3 p,.fake-site-v3 small,.fake-site-v3 .site-info-band span,.site-v2-service p,.site-why-grid span,.site-contact-card span{color:#496581!important}
+.fake-site-v3 h3,.fake-site-v3 h4,.site-v2-service strong,.site-v2-brand strong,.site-why-grid strong{color:#061326!important}
+.site-v2-links,.site-v2-service>span{color:#0B2A52!important}
+.site-hero-actions button,.site-v2-form>button{background:var(--brand)!important;color:#fff!important}
+.site-hero-actions .site-secondary{background:white!important;color:#0B2A52!important;border-color:#496581!important}
+.site-v2-form input,.site-v2-form select,.site-v2-form textarea{color:#061326!important;border-color:#496581!important}
+.bizi-conversion{background:#EAF3FF!important;color:#061326!important;border-color:#8FC2FF!important}
+.bizi-conversion p,.bizi-form-note,#biziLeadStatus{color:#496581!important}
+.bizi-conversion-actions a{color:#0B2A52!important;border-color:#2E66B8!important}
+.bizi-enquiry,.bizi-enquiry input,.bizi-enquiry select,.bizi-enquiry textarea,.bizi-close{color:#061326!important}
+.bizi-enquiry::backdrop{background:rgba(6,19,38,.8)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid #8FC2FF!important;outline-offset:3px!important;box-shadow:0 0 0 5px #061326!important}
+.fake-site-v3 :focus-visible,.bizi-enquiry :focus-visible,.bizi-conversion :focus-visible{outline-color:#2E66B8!important;box-shadow:0 0 0 5px #fff!important}
+@media(max-width:760px){.builder-copy{grid-template-columns:1fr;gap:18px;}.builder-copy>.tiny-brand{grid-column:1}.bizi-hero-photo{grid-column:1;grid-row:4;min-height:250px;aspect-ratio:3/2}.builder-copy h1{font-size:38px!important}.site-v2-hero-art{min-height:240px}.bizi-room-photo{max-height:240px}.bizi-contact{min-height:44px}.experience-tabs button{min-height:44px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
