@@ -63,6 +63,17 @@ flowchart TD
 - Custom FAQ search API
 - Slack
 
+## Live Bizi Systems demos
+
+The same customer-operations pattern is demonstrated publicly in several Bizi Systems vertical demos. These environments use synthetic/sample data and are portfolio evidence, not claims of production client outcomes.
+
+- [Hospitality Care](https://bizi-hospitality-care-demo-production.up.railway.app)
+- [Logistics Care](https://bizi-logistics-care-demo-production.up.railway.app)
+- [Real Estate Care](https://bizi-real-estate-demo-production.up.railway.app)
+- [Aesthetic Care](https://bizi-aesthetic-care-demo-production.up.railway.app)
+
+The demos show enquiry intake, structured customer/lead records, staff ownership, follow-up state, and explicit human takeover.
+
 ## Demo status
 
 A configured live-run recording is not included yet. Credentials and service identifiers remain placeholders.
