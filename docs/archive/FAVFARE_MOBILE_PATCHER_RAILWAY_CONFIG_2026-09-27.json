@@ -1,0 +1,77 @@
+{
+  "capturedAt": "2026-09-27",
+  "service": {
+    "id": "a0326b57-084e-4745-9450-a71b60b0ff43",
+    "name": "favfare-mobile-patcher"
+  },
+  "config": {
+    "source": {
+      "image": "node:24-alpine"
+    },
+    "build": {
+      "builder": "RAILPACK",
+      "buildEnvironment": "V3"
+    },
+    "deploy": {
+      "startCommand": "node -e '\nconst https = require(\"https\");\nconst url = require(\"url\");\n\nconst n8nBase = \"https://n8n-production-806e.up.railway.app\";\nconst enquiryId = \"8ceda31e-e9de-4c87-9d91-1a78b728a9b4\";\nconst sessionId = \"demo-1788675782890-37898\";\nconst timestamp = Date.now();\nconst testMsg = `Test msg ${timestamp}`;\n\nfunction post(path, body) {\n  return new Promise((resolve, reject) => {\n    const u = url.parse(`${n8nBase}${path}`);\n    const req = https.request({\n      hostname: u.hostname,\n      path: u.path,\n      method: \"POST\",\n      headers: {\"Content-Type\": \"application/json\"},\n      timeout: 10000\n    }, (res) => {\n      let data = \"\";\n      res.on(\"data\", chunk => data += chunk);\n      res.on(\"end\", () => resolve({status: res.statusCode, body: data}));\n    });\n    req.on(\"error\", reject);\n    req.setTimeout(10000, () => {req.destroy(); reject(new Error(\"timeout\"))});\n    req.write(JSON.stringify(body));\n    req.end();\n  });\n}\n\n(async () => {\n  try {\n    // Step 1: Take over\n    console.log(\"[TEST] Step 1: POST /webhook/favfare-demo/crm (action=staff_action, take_over)\");\n    let res = await post(\"/webhook/favfare-demo/crm\", {\n      action: \"staff_action\",\n      action_type: \"take_over\",\n      enquiry_id: enquiryId\n    });\n    console.log(`[TEST] Step 1 status: ${res.status}`);\n    let hasAutomationPausedTrue = res.body.includes(\"automation_paused\\\":true\") || res.body.includes(\"\\\"automation_paused\\\": true\");\n    console.log(hasAutomationPausedTrue ? \"[TEST] PASS: automation_paused=true\" : `[TEST] FAIL: automation_paused not true in: ${res.body.substring(0, 200)}`);\n\n    // Step 2: Chat while paused\n    console.log(\"[TEST] Step 2: POST /webhook/favfare-demo/patient-action-v9 (action=chat, paused)\");\n    res = await post(\"/webhook/favfare-demo/patient-action-v9\", {\n      session_id: sessionId,\n      action: \"chat\",\n      message: testMsg,\n      history: []\n    });\n    console.log(`[TEST] Step 2 status: ${res.status}`);\n    let hasAssistantReply = res.body.includes(\"<div class=\\\"assistant\") || res.body.includes(\"assistant\");\n    console.log(hasAssistantReply ? \"[TEST] FAIL: assistant reply found despite takeover\" : \"[TEST] PASS: no assistant reply during takeover\");\n\n    // Step 3: Return to assistant (always execute)\n    console.log(\"[TEST] Step 3: POST /webhook/favfare-demo/crm (action=staff_action, return_to_assistant)\");\n    res = await post(\"/webhook/favfare-demo/crm\", {\n      action: \"staff_action\",\n      action_type: \"return_to_assistant\",\n      enquiry_id: enquiryId\n    });\n    console.log(`[TEST] Step 3 status: ${res.status}`);\n    let hasAutomationPausedFalse = !res.body.includes(\"automation_paused\\\":true\") && !res.body.includes(\"\\\"automation_paused\\\": true\");\n    console.log(hasAutomationPausedFalse ? \"[TEST] PASS: automation_paused=false\" : `[TEST] FAIL: automation_paused still true: ${res.body.substring(0, 200)}`);\n\n    // Step 4: Chat after resume\n    console.log(\"[TEST] Step 4: POST /webhook/favfare-demo/patient-action-v9 (action=chat, resumed)\");\n    res = await post(\"/webhook/favfare-demo/patient-action-v9\", {\n      session_id: sessionId,\n      action: \"chat\",\n      message: testMsg + \" resumed\",\n      history: []\n    });\n    console.log(`[TEST] Step 4 status: ${res.status}`);\n    hasAssistantReply = res.body.includes(\"<div class=\\\"assistant\") || res.body.includes(\"assistant\");\n    console.log(hasAssistantReply ? \"[TEST] PASS: assistant reply resumed\" : \"[TEST] FAIL: no assistant reply after resume\");\n\n    console.log(\"[TEST] One-shot test complete\");\n  } catch (err) {\n    console.error(\"[TEST] ERROR:\", err.message);\n    try {\n      console.log(\"[TEST] Step 3b: Attempting cleanup POST return_to_assistant\");\n      await post(\"/webhook/favfare-demo/crm\", {\n        action: \"staff_action\",\n        action_type: \"return_to_assistant\",\n        enquiry_id: enquiryId\n      });\n      console.log(\"[TEST] Cleanup complete\");\n    } catch (cleanupErr) {\n      console.error(\"[TEST] Cleanup failed:\", cleanupErr.message);\n    }\n    process.exit(1);\n  }\n})();\n'",
+      "restartPolicyType": "NEVER",
+      "useLegacyStacker": false,
+      "ipv6EgressEnabled": false,
+      "runtime": "V2",
+      "multiRegionConfig": {
+        "us-west2": {
+          "numReplicas": 1
+        }
+      }
+    }
+  },
+  "variableNames": [
+    "MOBILE_CSS",
+    "N8N_API_KEY",
+    "N8N_URL",
+    "SYNC_ONLY"
+  ],
+  "recentDeployments": [
+    {
+      "id": "da57bf0d-e87f-411f-8d71-52e35d1c0aaf",
+      "status": "SUCCESS",
+      "createdAt": "2026-09-27T16:26:20.910Z",
+      "snapshotId": "578002a0-b51a-4918-8926-43a02b47d326",
+      "meta": {
+        "reason": "redeploy",
+        "image": "node:24-alpine"
+      }
+    },
+    {
+      "id": "e21e8382-0dd6-4d20-9dc7-6c66ec96687a",
+      "status": "REMOVED",
+      "createdAt": "2026-09-06T09:56:45.817Z",
+      "snapshotId": "e0442329-c0f1-409c-a37b-9a0c1411e33e",
+      "meta": {
+        "reason": "deploy",
+        "image": "node:24-alpine"
+      }
+    },
+    {
+      "id": "fb1f24f3-32e6-49a1-b9fd-bf39e3062c63",
+      "status": "REMOVED",
+      "createdAt": "2026-09-06T05:52:13.079Z",
+      "snapshotId": "42d48ddc-8aea-4405-9221-85204fb318a7",
+      "meta": {
+        "reason": "redeploy",
+        "image": "node:24-alpine"
+      }
+    },
+    {
+      "id": "cd878d88-440a-439b-87c7-8bab9135f7bf",
+      "status": "REMOVED",
+      "createdAt": "2026-09-06T05:41:16.742Z",
+      "snapshotId": "58c297c3-9250-4948-a194-d9c443439dbf",
+      "meta": {
+        "reason": "deploy",
+        "image": "node:24-alpine"
+      }
+    }
+  ],
+  "warning": "Variable values intentionally excluded. This file preserves the inline operational script/config because it is not source-controlled elsewhere."
+}
